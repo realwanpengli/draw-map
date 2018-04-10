@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>loadmapasyncHTML</title>
+        <style type='text/css'>body{margin:0;padding:0;overflow:hidden;font-family:'Segoe UI',Helvetica,Arial,Sans-Serif}</style>
+        <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+        <script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?key=YourBingMapsKey'></script>
+        <script type='text/javascript'>
+                var map;
+                function loadMapScenario() {
+                    map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
+                        center: new Microsoft.Maps.Location(51.50632, -0.12714),
+                        mapTypeId: Microsoft.Maps.MapTypeId.aerial,
+                        zoom: 10
+                    });
+
+                    var center = map.getCenter();
+                    
+                    //Create custom Pushpin
+                    var pin = new Microsoft.Maps.Pushpin(center, {
+                        icon: 'images/plane.png',
+                        anchor: new Microsoft.Maps.Point(12, 39)
+                    });
+
+                    //Add the pushpin to the map
+                    map.entities.push(pin);
+
+                }
+
+                
+            
+        </script>
+    </head>
+    <body onload='loadMapScenario();'>
+        <div id='printoutPanel'></div>
+        
+        <div id='myMap' style='width: 100vw; height: 100vh;'></div>
+    </body>
+</html>
