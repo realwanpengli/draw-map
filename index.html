@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Real-Time Aircraft Map</title>
+        <style type='text/css'>body{margin:0;padding:0;overflow:hidden;font-family:'Segoe UI',Helvetica,Arial,Sans-Serif}</style>
+        <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+        <script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?key=AqJE7zYyzdIzgJoI-qIn_BBB2WHPGFQ_cWxfqi4T0mYf2UsReMxPnbUXHLyhoh-3'></script>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+        <script type='text/javascript' src='./js/loadData.js'></script>
+        <script type='text/javascript' src='./js/map.js'></script>
+        <script type='text/javascript' src='./js/test.js'></script>
+        <script type='text/javascript'>
+
+            $(function() {
+                test();
+                var map = loadMapScenario();
+                var data = loadAircraftData('./aircraftData/aircraftList.json');
+                console.log('data', data);
+                var aircraftList = data.acList;
+                console.log('aircraftList', aircraftList);
+
+                var aircraftDict = {};
+                drawAircraft(aircraftList, aircraftDict, map);
+
+            });
+        </script>
+        
+    </head>
+    <body>
+        <div id='printoutPanel'></div>
+        
+        <div id='myMap' style='width: 100vw; height: 90vh;'></div>
+        <button onclick="movePin()">Move Pin</button>
+    </body>
+</html>
