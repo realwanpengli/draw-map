@@ -1,0 +1,7 @@
+C:\Users\albertxavier\Documents\microsoft\projects\realtimeAircraftMap\samples\Custom Animations in Bing Maps\C# and JavaScript\AnimatedMaps\Web\bin\AnimatedMaps.dll.config
+C:\Users\albertxavier\Documents\microsoft\projects\realtimeAircraftMap\samples\Custom Animations in Bing Maps\C# and JavaScript\AnimatedMaps\Web\bin\AnimatedMaps.dll
+C:\Users\albertxavier\Documents\microsoft\projects\realtimeAircraftMap\samples\Custom Animations in Bing Maps\C# and JavaScript\AnimatedMaps\Web\bin\AnimatedMaps.pdb
+C:\Users\albertxavier\Documents\microsoft\projects\realtimeAircraftMap\samples\Custom Animations in Bing Maps\C# and JavaScript\AnimatedMaps\Web\obj\Debug\AnimatedMaps.csprojResolveAssemblyReference.cache
+C:\Users\albertxavier\Documents\microsoft\projects\realtimeAircraftMap\samples\Custom Animations in Bing Maps\C# and JavaScript\AnimatedMaps\Web\obj\Debug\AnimatedMaps.csproj.CoreCompileInputs.cache
+C:\Users\albertxavier\Documents\microsoft\projects\realtimeAircraftMap\samples\Custom Animations in Bing Maps\C# and JavaScript\AnimatedMaps\Web\obj\Debug\AnimatedMaps.dll
+C:\Users\albertxavier\Documents\microsoft\projects\realtimeAircraftMap\samples\Custom Animations in Bing Maps\C# and JavaScript\AnimatedMaps\Web\obj\Debug\AnimatedMaps.pdb
