@@ -72,8 +72,14 @@ function movePinToLocation(dest, pin, duration, delay) {
 }
 
 function initAircraft(aircraftJsonStr) {
-    var json = JSON.parse(aircraftJsonStr);
+    console.log('initAircraft');
+    // console.log('aircraftJsonStr', aircraftJsonStr);
+    // var json = JSON.parse(aircraftJsonStr);
+
+    var json = aircraftJsonStr;
+    console.log('json', json);
     list = json.acList;
+    console.log('list', list);
     _initAircraft(aircraftList, aircraftDict, map);
 }
 
