@@ -13,3 +13,8 @@ function loadAircraftList(callback) {
         success: callback
     });
 }
+
+function getAircraftList(json) {
+	var list = json.acList;
+	return list;
+}

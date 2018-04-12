@@ -18,13 +18,13 @@ function _initAircraft(aircraftList, aircraftDict, map) {
         var aircraft = aircraftList[i];
         // todo: what if no long and lat
         if (aircraft.Lat == undefined) continue;
-        console.log('aircraftList', aircraftList);
-        console.log('aircraft', aircraft);
-        console.log('lat',aircraft.Lat, 'long',aircraft.Long);
+        // console.log('aircraftList', aircraftList);
+        // console.log('aircraft', aircraft);
+        // console.log('lat',aircraft.Lat, 'long',aircraft.Long);
         var location = new Microsoft.Maps.Location(aircraft.Lat, aircraft.Long);
         var pin = new Microsoft.Maps.Pushpin(location, {
-            icon: 'images/plane.png',
-            anchor: new Microsoft.Maps.Point(12, 39)
+            icon: 'images/plane.png'
+            // ,anchor: new Microsoft.Maps.Point(12, 39)
         });
 
         // todo: what if lat == undefined?
@@ -77,9 +77,9 @@ function initAircraft(aircraftJsonStr) {
     // var json = JSON.parse(aircraftJsonStr);
 
     var json = aircraftJsonStr;
-    console.log('json', json);
-    list = json.acList;
-    console.log('list', list);
+    // console.log('json', json);
+    var aircraftList = getAircraftList(json);
+    // console.log('list', aircraftList);
     _initAircraft(aircraftList, aircraftDict, map);
 }
 
@@ -87,11 +87,25 @@ function updateAircraft(newAircraftList) {
     loadAircraftList(_updateAircraft);
 }
 
-function _updateAircraft(newAircraftList) {
+function _updateAircraft(newAircraftJson) {
+    var newAircraftList =  getAircraftList(newAircraftJson);
+    console.log('update aircraft');
+    // console.log('newAircraftList', newAircraftList);
     for (var i = 0; i < newAircraftList.length; i++) {
+        var newLat = newAircraftList[i].Lat;
+        var newLong = newAircraftList[i].Long;
+        if (newLat == undefined) continue;
+        if (newLat > 90 || newLat < -90) {
+            console.log('error lat', newLat, 'aircraft', newAircraftList[i]);
+            continue;
+        }
         var key = newAircraftList[i].Icao;
+        var pin = aircraftDict[key];
+        // console.log('newAircraftList[i] latitude', newLat);
+        var newLoc = new Microsoft.Maps.Location(newLat, newLong);
+        // console.log('key', key);
         if (aircraftDict[key] != undefined) {
-            movePinToLocation(aircraftDict[key], updateInterval, updateDelay);
+            movePinToLocation(newLoc, pin, updateInterval, updateDelay);
         }
     }
 }

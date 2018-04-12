@@ -15,6 +15,8 @@
         <script type='text/javascript' src='./js/test.js'></script>
         <script type='text/javascript'>
 
+            // global var
+            var map;
             var aircraftDict = {};
             var updateInterval = 990;
             var updateDelay = 30;
@@ -38,12 +40,12 @@
 
             function GetMap() {
                 test();
-                var map = loadMapScenario();
+                map = loadMapScenario();
                 loadAircraftList(initAircraft);
 
                 //update aircraft
                 var updateDelay = 1000;
-                // setInterval(updateAircraft, updateDelay);
+                setInterval(updateAircraft, updateDelay);
             }
 
             //test
