@@ -18,8 +18,10 @@
             // global var
             var map;
             var aircraftDict = {};
-            var updateInterval = 990;
+            var updateDuration = 10000;
             var updateDelay = 30;
+            var debug = true;
+            var debugAircraft = '780BEF';
 // test
             var path = [
                 new Microsoft.Maps.Location(42.8, 12.49),   //Italy
@@ -44,8 +46,7 @@
                 loadAircraftList(initAircraft);
 
                 //update aircraft
-                var updateDelay = 1000;
-                setInterval(updateAircraft, updateDelay);
+                setInterval(updateAircraft, updateDuration);
             }
 
             //test
