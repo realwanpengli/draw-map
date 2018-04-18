@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <title>Real-Time Aircraft Map</title>
+        <style type='text/css'>body{margin:0;padding:0;overflow:hidden;font-family:'Segoe UI',Helvetica,Arial,Sans-Serif}</style>
+        <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+        <!-- <script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?key=AqJE7zYyzdIzgJoI-qIn_BBB2WHPGFQ_cWxfqi4T0mYf2UsReMxPnbUXHLyhoh-3&'></script> -->
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+        <!-- <script type="text/javascript" src="./js/AnimationModule.js"></script> -->
+        <script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=AqJE7zYyzdIzgJoI-qIn_BBB2WHPGFQ_cWxfqi4T0mYf2UsReMxPnbUXHLyhoh-3&'></script>
+
+        <!-- <script type="text/javascript" src="scripts/PanningOverlay.js"></script> -->
+        <script type="text/javascript" src="scripts/signalr.js"></script>
+        <script type="text/javascript" src="scripts/connect-signalr.js"></script>
+        <script type='text/javascript' src='./scripts/loadData.js'></script>
+        <script type='text/javascript' src='./scripts/map.js'></script>
+        <script type='text/javascript' src='./scripts/parallel.js'></script>
+        <script type='text/javascript' src='./scripts/test.js'></script>
+
+        <script type='text/javascript'>
+
+            // global var
+            var map;
+            var aircraftDict = {};
+            var tmpAircraftList = [];
+            var updateDuration = 8000;
+            var updateDelay = 30;
+            var debug = true;
+            var debugAircraft = '471F70';
+            var jsonStr = "";
+            var start, end;
+            var globalJson = null;
+            var isInit = false;
+// test
+            var path = [
+                new Microsoft.Maps.Location(42.8, 12.49),   //Italy
+                new Microsoft.Maps.Location(51.5, 0),       //London
+                new Microsoft.Maps.Location(40.8, -73.8),   //New York
+                new Microsoft.Maps.Location(47.6, -122.3)   //Seattle
+            ];
+
+            // $(function() {
+            //     test();
+            //     var map = loadMapScenario();
+            //     loadAircraftList(initAircraft);
+
+            //     //update aircraft
+            //     var updateDelay = 1000;
+            //     // setInterval(updateAircraft, updateDelay);
+            // });
+
+            
+
+            //test
+            function movePin() {
+                var pin;
+                for (var key in aircraftDict) {
+                    pin = aircraftDict[key];
+                    break;
+                }
+                movePinToLocation(path[0], pin, 30000, 30);
+                console.log('pin location', pin.getLocation());
+            }
+
+            // signalr
+            // $(window).load(function() {
+
+            //         // setTimeout(initAircraft(globalJson), 500);
+            //     // var overlay = new PanningOverlay();
+            //     // console.log('overlay', overlay);
+            //     // map.layers.insert(overlay);
+                
+            // });
+
+            document.addEventListener('DOMContentLoaded', function () {
+                console.log("connecting signalR");
+
+                startConnection('/chat', bindConnectionMessage)
+                .then(onConnected)
+                .catch(onConnectionError);
+            });
+            
+        </script>
+        
+    </head>
+    <body>
+        <div id='printoutPanel'></div>
+        
+        <div id='myMap' style='width: 100vw; height: 90vh;'></div>
+        <div id='footer' style='width: 100vw; height: 10vh;'>
+            <button id='london' onclick="panMap('London')">London</button>
+            <button id='shanghai' onclick="panMap('Shanghai')">Shanghai</button>
+            <button id='newyork' onclick="panMap('NewYork')">NewYork</button>
+            <!-- <button id='update' >update</button> -->
+            <button id='sendmessage'>sendmessage</button>
+        </div>
+        <!-- <button id='move' onclick="movePin()">Move Pin</button> -->
+    </body>
+</html>
