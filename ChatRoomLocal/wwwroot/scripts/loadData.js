@@ -69,8 +69,5 @@ function readTextFile(file, callback)
 
 
 function getAircraftList(json) {
-    // console.log('getAircraftList json', json);
-    
-	var list = json.acList;
-	return list;
+    return json;
 }

@@ -1,7 +1,21 @@
 
 function GetMap() {
     // test();
-        loadMapScenario();
+    // init map var
+    path = [
+        new Microsoft.Maps.Location(42.8, 12.49),   //Italy
+        new Microsoft.Maps.Location(51.5, 0),       //London
+        new Microsoft.Maps.Location(40.8, -73.8),   //New York
+        new Microsoft.Maps.Location(47.6, -122.3)   //Seattle
+    ];
+
+    cityLocation = {
+        'London': new Microsoft.Maps.Location(51.5074, 0.1278),
+        'Shanghai': new Microsoft.Maps.Location(31.2304, 121.4737),
+        'NewYork': new Microsoft.Maps.Location(40.7128, -74.0060)
+    };
+
+    loadMapScenario();
     // loadAircraftList(function (data) {
     //     globalJson = data;
         
@@ -253,9 +267,10 @@ function addPins(aircraftDict, aircraftList, map) {
         var location = new Microsoft.Maps.Location(aircraft.Lat, aircraft.Long);
         var aircraftImage = getIconUrl(aircraft.Icao);
         
+        var city = aircraft.From.includes('Shanghai') || aircraft.To.includes('Shanghai') ? '@Sh' : ''; 
         var pin = new Microsoft.Maps.Pushpin(location, {
                 icon: aircraftImage,
-                title: aircraft.Icao,
+                title: aircraft.Icao + city,
                 subTitle: "From:"+aircraft.From+';To:'+aircraft.To
         });
         addedCnt ++;
@@ -298,7 +313,7 @@ function initAircraft(aircraftJsonStr) {
 
     // var json = aircraftJsonStr;
     // globalJson = JSON.parse(aircraftJsonStr);
-    // console.log('aircraftJsonStr', aircraftJsonStr);
+    console.log('aircraftJsonStr', aircraftJsonStr);
     var aircraftList = getAircraftList(JSON.parse(aircraftJsonStr));
     // console.log('list', aircraftList);
     _initAircraft(aircraftList, aircraftDict, map);
@@ -414,9 +429,10 @@ function _updateAircraft(newAircraftJson) {
             // addPin(newAircraftList[i], aircraftDict, map);
             // console.log('add pins when updating');
             var newLoc = new Microsoft.Maps.Location(newLat, newLong);
+            var city = newAircraftList[i].From.includes('Shanghai') || newAircraftList[i].To.includes('Shanghai') ? '@Sh' : ''; 
             pin = new Microsoft.Maps.Pushpin(newLoc, {
                     icon: aircraftImage,
-                    title: newAircraftList[i].Icao
+                    title: newAircraftList[i].Icao + city
                     // subTitle: "From:"+aircraft.From+';To:'+aircraft.To
 
                                 });
@@ -487,14 +503,8 @@ function containsLondon(str) {
 }
 
 
-    var cityLocation = {
-        'London': new Microsoft.Maps.Location(51.5074, 0.1278),
-        'Shanghai': new Microsoft.Maps.Location(31.2304, 121.4737),
-        'NewYork': new Microsoft.Maps.Location(40.7128, -74.0060)
-    };
-
-    function panMap(city) {
-        map.setView({
-            center: cityLocation[city]
-        });
-    }
+function panMap(city) {
+    map.setView({
+        center: cityLocation[city]
+    });
+}

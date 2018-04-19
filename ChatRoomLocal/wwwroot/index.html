@@ -32,13 +32,9 @@
             var start, end;
             var globalJson = null;
             var isInit = false;
-// test
-            var path = [
-                new Microsoft.Maps.Location(42.8, 12.49),   //Italy
-                new Microsoft.Maps.Location(51.5, 0),       //London
-                new Microsoft.Maps.Location(40.8, -73.8),   //New York
-                new Microsoft.Maps.Location(47.6, -122.3)   //Seattle
-            ];
+            var path, cityLocation;
+
+            
 
             // $(function() {
             //     test();
@@ -92,8 +88,8 @@
             <button id='london' onclick="panMap('London')">London</button>
             <button id='shanghai' onclick="panMap('Shanghai')">Shanghai</button>
             <button id='newyork' onclick="panMap('NewYork')">NewYork</button>
-            <!-- <button id='update' >update</button> -->
             <button id='sendmessage'>sendmessage</button>
+            <!-- <button id='reset' >reset</button> -->
         </div>
         <!-- <button id='move' onclick="movePin()">Move Pin</button> --> 
     </body>

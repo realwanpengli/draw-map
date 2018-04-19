@@ -32,8 +32,6 @@ function startConnection(url, configureConnection) {
 
                 }
 
-
-
                 return Promise.reject(error);
 
             });
@@ -46,9 +44,6 @@ function onConnectionError(error) {
     if (error && error.message) {
         console.error(error.message);
     }
-    // var modal = document.getElementById('myModal');
-    // modal.classList.add('in');
-    // modal.style = 'display: block;';
 }
 
 function onConnected(connection) {
@@ -56,47 +51,19 @@ function onConnected(connection) {
     // connection.send('broadcastMessage', '_SYSTEM_', username + ' JOINED');
     $('#sendmessage').click(function (event) {
         // Call the broadcastMessage method on the hub.
-        if (true) {
-            var username = "@@@@@@@@@@@@@@@@@@xavier";
-            var val = "@@@@@@@@@@@@@@@@@@@is GREAT!";
-            connection.send('broadcastMessage', updateDuration, val);
-        }
-
-        // Clear text box and reset focus for next comment.
-        // messageInput.value = '';
-        // messageInput.focus();
-        // event.preventDefault();
+        var username = "@@@@@@@@@@@@@@@@@@xavier";
+        var val = "@@@@@@@@@@@@@@@@@@@is GREAT!";
+        connection.send('broadcastMessage', updateDuration, val);
     });
-    // document.getElementById('update').addEventListener('click', function (event) {
-    //     // if (event.keyCode === 13) {
-    //     //     event.preventDefault();
-    //         document.getElementById('sendmessage').click();
-    //     //     return false;
-    //     // }
-    // });
-    // document.getElementById('echo').addEventListener('click', function (event) {
-    //     // Call the echo method on the hub.
-    //     connection.send('echo', username, messageInput.value);
 
-    //     // Clear text box and reset focus for next comment.
-    //     messageInput.value = '';
-    //     messageInput.focus();
-    //     event.preventDefault();
+    // $('#reset').click(function (event) {
+    //     connection.send('', '');
     // });
+    
 }
 
 function bindConnectionMessage(connection) {
     var messageCallback = function(name, message) {
-        // if (!message) return;
-        // Html encode display name and message.
-        // var encodedName = name;
-        // var encodedMsg = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        // var messageEntry = createMessageEntry(encodedName, encodedMsg);
-                    
-        // var messageBox = document.getElementById('messages');
-        // messageBox.appendChild(messageEntry);
-        // messageBox.scrollTop = messageBox.scrollHeight;
-
         console.log('signalR', name);
         if (!isInit) {
             initAircraft(message);
@@ -105,8 +72,10 @@ function bindConnectionMessage(connection) {
             updateAircraft(message);
         }
     };
+
+    var echoCallBack = null;
     // Create a function that the hub can call to broadcast messages.
     connection.on('broadcastMessage', messageCallback);
-    // connection.on('echo', messageCallback);
+    connection.on('echo', echoCallBack);
     connection.onclose(onConnectionError);
 }
