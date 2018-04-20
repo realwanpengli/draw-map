@@ -48,22 +48,20 @@ function onConnectionError(error) {
 
 function onConnected(connection) {
     console.log('connection started');
-    // connection.send('broadcastMessage', '_SYSTEM_', username + ' JOINED');
     $('#sendmessage').click(function (event) {
-        // Call the broadcastMessage method on the hub.
-        var username = "@@@@@@@@@@@@@@@@@@xavier";
-        var val = "@@@@@@@@@@@@@@@@@@@is GREAT!";
-        connection.send('broadcastMessage', updateDuration, val);
+        var info = "Start updpate aircrafts";
+        var currentBound = map.getBounds();
+        var north = currentBound.getNorth();
+        var east = currentBound.getEast();
+        var south = currentBound.getSouth();
+        var west = currentBound.getWest();
+        connection.send('startUpdate', updateDuration, north, east, south, west);
     });
-
-    // $('#reset').click(function (event) {
-    //     connection.send('', '');
-    // });
     
 }
 
 function bindConnectionMessage(connection) {
-    var messageCallback = function(name, message) {
+    var updateAircraftsCallback = function(name, message) {
         console.log('signalR', name);
         aircraftJsonStrCache = message;
         if (!isInit) {
@@ -74,9 +72,23 @@ function bindConnectionMessage(connection) {
         }
     };
 
-    var echoCallBack = null;
+    var updateBoundRequestCallBack = function(arg) {
+        var currentBound = map.getBounds();
+        var north = currentBound.getNorth();
+        var east = currentBound.getEast();
+        var south = currentBound.getSouth();
+        var west = currentBound.getWest();
+        console.log('updateBoundRequestCallBack');
+        connection.send('updateBound', north, east, south, west);
+    }
+
+    var echoCallBack = function (arg) {
+        console.log('echo callback', arg);
+    };
     // Create a function that the hub can call to broadcast messages.
-    connection.on('broadcastMessage', messageCallback);
+    connection.on('startUpdate', updateAircraftsCallback);
+    connection.on('updateAircraft', updateAircraftsCallback);
     connection.on('echo', echoCallBack);
+    connection.on('updateBoundRequest', updateBoundRequestCallBack);
     connection.onclose(onConnectionError);
 }

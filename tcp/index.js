@@ -11,14 +11,7 @@ client.on('connect', function(){
     console.log('客户端：已经与服务端建立连接');
 });
 
-client.on('data', function(data){
-    console.log('客户端：收到服务端数据，内容为'+ data);
-    fs.appendFile("plane.json", data, function(err) {
-        if (err) {
-            console.log('error', err);
-        }
-    });
-});
+
 
 client.on('close', function(data){
     console.log('客户端：连接断开');

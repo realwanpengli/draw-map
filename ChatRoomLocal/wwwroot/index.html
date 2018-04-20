@@ -34,18 +34,6 @@
             var isInit = false;
             var path, cityLocation;
 
-            //test
-            function movePin() {
-                var pin;
-                for (var key in aircraftDict) {
-                    pin = aircraftDict[key];
-                    break;
-                }
-                movePinToLocation(path[0], pin, 30000, 30);
-                console.log('pin location', pin.getLocation());
-            }
-
-
             document.addEventListener('DOMContentLoaded', function () {
                 console.log("connecting signalR");
 
@@ -62,12 +50,10 @@
         
         <div id='myMap' style='width: 100vw; height: 90vh;'></div>
         <div id='footer' style='width: 100vw; height: 10vh;'>
+            <button id='sendmessage'>Start</button>
             <button id='london' onclick="panMap('London')">London</button>
             <button id='shanghai' onclick="panMap('Shanghai')">Shanghai</button>
             <button id='newyork' onclick="panMap('NewYork')">NewYork</button>
-            <button id='sendmessage'>sendmessage</button>
-            <!-- <button id='reset' >reset</button> -->
         </div>
-        <!-- <button id='move' onclick="movePin()">Move Pin</button> --> 
     </body>
 </html>
