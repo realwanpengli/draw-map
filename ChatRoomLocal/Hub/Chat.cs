@@ -63,18 +63,5 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             // Console.WriteLine(contents);
             return contents;
         }
-
-
-
-        // public static void myUpdate(string msg)
-        // {
-        //     var hubContext = GlobalHost.ConnectionManager.GetHubContext<Chat>();
-        //     hubContext.Clients.All.foo(msg);
-        // }
-        
-        // internal static void updateAircraft(string jsonStr) {
-        //     IHubContext context = GlobalHost.ConnectionManager.GetHubContext<Chat>();
-        //     context.Clients.messageRecieved(message);
-        // }
     }
 }

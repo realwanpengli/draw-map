@@ -3,15 +3,23 @@ import glob
 import json
 
 curDirPath = os.path.dirname(__file__)
-
-data_folder_path = os.path.join(os.getcwd(), '..', 'data', '*.json');
+data_folder_path = os.path.join(curDirPath, '..', 'data', '*.json');
 print(data_folder_path)
 
 data_files = glob.glob(data_folder_path)
 plane_list = ['405A48', '400A25', '40095D', '010160', '3C6643','40097E', '4CA215', '40701B', '3991E5', '406531'];
 
-l = 60;
-record = [{}] * l;
+l = 60
+record = [{}] * l
+
+def plane_filter(ac, plane_list, city):
+	if ac['Icao'] in plane_list or \
+		'From' in ac and city in ac['From'] or \
+		'To' in ac and city in ac['To']:
+		return True
+	return False
+
+
 print(record)
 print('data_files len', len(data_files))
 for i in range(len(data_files)):
@@ -26,7 +34,7 @@ for i in range(len(data_files)):
 	acList = j['acList']
 	tmp = []
 	for ac in acList:
-		if ac['Icao'] in plane_list:
+		if plane_filter(ac, plane_list, 'New York'):
 			# print(i, ac.get('Icao', '000000'))
 			tmp.append({ 
 				'Icao': ac.get('Icao', '000000'),
@@ -35,7 +43,7 @@ for i in range(len(data_files)):
 				'Gnd': ac.get('Gnd', False),
 				'From': ac.get('From', ''),
 				'To': ac.get('To', '')
-			});
+			})
 	record[i] = tmp
 	# print(record)
 				

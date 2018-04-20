@@ -65,6 +65,7 @@ function onConnected(connection) {
 function bindConnectionMessage(connection) {
     var messageCallback = function(name, message) {
         console.log('signalR', name);
+        aircraftJsonStrCache = message;
         if (!isInit) {
             initAircraft(message);
             isInit = true;

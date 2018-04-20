@@ -16,13 +16,6 @@ function GetMap() {
     };
 
     loadMapScenario();
-    // loadAircraftList(function (data) {
-    //     globalJson = data;
-        
-    //     initAircraft(globalJson);
-
-    // });
-    
 }
 
 function loadMapScenario() {
@@ -30,38 +23,8 @@ function loadMapScenario() {
         center: new Microsoft.Maps.Location(51.5074, 0.1278),
         mapTypeId: Microsoft.Maps.MapTypeId.road,
         liteMode: true,
-        zoom: 11
+        zoom: 9
     });
-
-
-    
-
-    
-
-
-    // Microsoft.Maps.Events.addHandler(map, 'mouseup', updateAircraftOmMapChanged);
-    // Microsoft.Maps.Events.addHandler(map, 'viewchangeend', loadAircraftList(updateAircraft));
-    // var center = map.getCenter();
-    // map.entities.push(new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(51.5074, 0.1278), {
-    //         text: 'o'
-    //     }));
-
-
-    // map.entities.push(new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(51.5194, 0.1278), {
-    //         text: '+lat'
-    //     })); 
-
-    // map.entities.push(new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(51.4954, 0.1278), {
-    //         text: '-lat'
-    //     })); 
-
-    // map.entities.push(new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(51.5074, 0.1378), {
-    //         text: '+long'
-    //     })); 
-
-    // map.entities.push(new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(51.5074, 0.1178), {
-    //         text: '-long'
-    //     }));
     return map;
 }
 
@@ -116,8 +79,6 @@ function rotatePushpin(pin, dest, url, angle) {
        var height = Math.round(img.width * dy + img.height * dx);
 
 
-        // c.width = Math.abs(Math.round(img.width * Math.cos(rotationAngleRads) + img.height * Math.sin(rotationAngleRads)));
-        // c.height = Math.abs(Math.round(img.width * Math.sin(rotationAngleRads) + img.height * Math.cos(rotationAngleRads)));
         c.width = width;
         c.height = height;
 
@@ -146,7 +107,6 @@ function rotatePushpin(pin, dest, url, angle) {
 
 
 
-
 function _interpolatePosition(src, dest, curTimestamp, startTimeStamp, duration) {
     var latVec = -src.latitude + dest.latitude;
     var longVec = -src.longitude + dest.longitude;
@@ -163,6 +123,8 @@ function movePinToLocation(dest, pin, duration, id) {
     var latVec = -src.latitude + dest.latitude;
     var longVec = -src.longitude + dest.longitude;
     
+    console.log(id, 'distance', Math.sqrt(latVec * latVec + longVec * longVec));
+
     rotatePushpin(pin, dest, getIconUrl(id), compAngle(src, dest));
 
     var start = null;
@@ -224,8 +186,9 @@ function _containsInScreen(aircraft, bound) {
 
 
 function getIconUrl(id) {
-    var aircraftImage = 'images/plane-new2.png';
+    var aircraftImage = 'images/airplane.svg';
     if (id == debugAircraft) {
+        // aircraftImage = 'images/airplane.svg';
         aircraftImage = 'images/plane.png';
         return aircraftImage;
     }
@@ -237,41 +200,33 @@ function addPins(aircraftDict, aircraftList, map) {
     var startTime, endTime;
     console.log('add pins');
     startTime = new Date();
-    var l = aircraftList.length;
+    var l = aircraftList.length; 
+    console.log('aircraft list len = ', aircraftList.length);
     tmpAircraftList = aircraftList.slice();
-    // console.log('l',l);
     var addedCnt = 0;
     var pins = new Microsoft.Maps.EntityCollection();
     for (var i = 0; i < l; i++) {
-        // console.log('i',i);
-        // console.log('aircraft', aircraftList[i], 'from', aircraftList[i].From, 'to', aircraftList[i].To);
         if (!containsLondon(aircraftList[i].From) && !containsLondon(aircraftList[i].To)) {
             continue;
         }
 
         var aircraft = aircraftList[i];
-
         // debug
         if (debug) {
             if (aircraft.Icao != debugAircraft) {
                 continue;
             }
         }
-        // console.log('i',i);
-
         if (!_containsInScreen(aircraft, map.getBounds())) {
             continue;
         }
-        // addPin(aircraft, aircraftDict, map);
         if (!_isLatValid(aircraft.Lat) || !_isLongValid(aircraft.Long)) return;
         var location = new Microsoft.Maps.Location(aircraft.Lat, aircraft.Long);
         var aircraftImage = getIconUrl(aircraft.Icao);
-        
         var city = aircraft.From.includes('Shanghai') || aircraft.To.includes('Shanghai') ? '@Sh' : ''; 
         var pin = new Microsoft.Maps.Pushpin(location, {
                 icon: aircraftImage,
-                title: aircraft.Icao + city,
-                subTitle: "From:"+aircraft.From+';To:'+aircraft.To
+                title: aircraft.Icao 
         });
         addedCnt ++;
         // add aircraft to map and dict
@@ -279,92 +234,31 @@ function addPins(aircraftDict, aircraftList, map) {
         pins.push(pin);
     }
 
-    // console.log('init pins', pins);
-    // console.log('addedCnt', addedCnt);
     map.entities.push(pins);
 
     endTime = new Date();
-    // console.log('addpins time', (endTime - startTime)/1000);
+    console.log('addpins time', (endTime - startTime)/1000);
 }
 
 function _initAircraft(aircraftList, aircraftDict, map) {
-    // console.log('is in map', map.getBounds().contains(map.getCenter()));
-    // loadAircraftList(function (data) {
-    //     globalJson = data;
-    // });
-
     var totalCnt = aircraftList.length;
     console.log('totalCnt', totalCnt);
     addPins(aircraftDict, aircraftList, map);
 
-    //update aircraft
-    // updateAircraft(globalJson);
-    // setInterval(updateAircraft, updateDuration);
 }
 
 
 function initAircraft(aircraftJsonStr) {
-    // end = new Date();
-    // console.log('load data time', (end-start)/1000);
-
     console.log('initAircraft');
-    // console.log('aircraftJsonStr', aircraftJsonStr);
-    // var json = JSON.parse(aircraftJsonStr);
-
-    // var json = aircraftJsonStr;
-    // globalJson = JSON.parse(aircraftJsonStr);
-    console.log('aircraftJsonStr', aircraftJsonStr);
     var aircraftList = getAircraftList(JSON.parse(aircraftJsonStr));
-    // console.log('list', aircraftList);
     _initAircraft(aircraftList, aircraftDict, map);
 
     
 }
 
 function updateAircraft(aircraftJsonStr) {
-    // end = new Date();
-    // console.log('load data time', (end-start)/1000);
     _updateAircraft(JSON.parse(aircraftJsonStr));
-    // loadAircraftList(function (data) {
-    //                 globalJson = data;
-    //             });
 }
-
-// function updateAircraftOmMapChanged() {
-//     var startTime, endTime;
-//     startTime = new Date();
-//     console.log('update on map changed');
-//     var pins = new Microsoft.Maps.EntityCollection();
-//     var l = tmpAircraftList.length;
-//     // console.log('tmpAircraftList', tmpAircraftList);
-//     for (var i = 0; i < l; i++) {
-//         var key = tmpAircraftList[i].Icao;
-//         if (aircraftDict[key] == undefined) {
-//             continue;
-//         }
-//         var lat = tmpAircraftList[i].Lat;
-//         var long = tmpAircraftList[i].Long;
-//         if (!_isLatValid(lat) || !_isLongValid(long)) {
-//             continue;
-//         }
-//         var loc = new Microsoft.Maps.Location(lat, long);
-//         if (!map.getBounds().contains(loc)) {
-//             continue;
-//         }
-//         var aircraftImage = getIconUrl(tmpAircraftList[i].Icao);
-//         var pin = new Microsoft.Maps.Pushpin(loc, {
-//                 icon: aircraftImage,
-//                 title: tmpAircraftList[i].Icao
-//         });
-//         pins.push(pin);
-//     }
-
-//     map.entities.push(pins);
-//     endTime = new Date();
-//     console.log('updateAircraftOmMapChanged time', (endTime - startTime)/1000);
-//     _updateAircraft(tmpAircraftList);
-// }
-
 
 
 function _addVar(array, data) {
@@ -504,7 +398,9 @@ function containsLondon(str) {
 
 
 function panMap(city) {
+    map.entities.clear();
     map.setView({
         center: cityLocation[city]
     });
+    initAircraft(aircraftJsonStrCache);
 }

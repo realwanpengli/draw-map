@@ -26,27 +26,13 @@
             var tmpAircraftList = [];
             var updateDuration = 8000;
             var updateDelay = 30;
-            var debug = true;
+            var debug = false;
             var debugAircraft = '471F70';
             var jsonStr = "";
             var start, end;
-            var globalJson = null;
+            var aircraftJsonStrCache = null;
             var isInit = false;
             var path, cityLocation;
-
-            
-
-            // $(function() {
-            //     test();
-            //     var map = loadMapScenario();
-            //     loadAircraftList(initAircraft);
-
-            //     //update aircraft
-            //     var updateDelay = 1000;
-            //     // setInterval(updateAircraft, updateDelay);
-            // });
-
-            
 
             //test
             function movePin() {
@@ -59,15 +45,6 @@
                 console.log('pin location', pin.getLocation());
             }
 
-            // signalr
-            // $(window).load(function() {
-
-            //         // setTimeout(initAircraft(globalJson), 500);
-            //     // var overlay = new PanningOverlay();
-            //     // console.log('overlay', overlay);
-            //     // map.layers.insert(overlay);
-                
-            // });
 
             document.addEventListener('DOMContentLoaded', function () {
                 console.log("connecting signalR");
