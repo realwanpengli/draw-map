@@ -19,3 +19,14 @@ C:\Users\wanl\Documents\microsoft\projects\realtimeAircraftMap\ChatRoomLocal\obj
 C:\Users\wanl\Documents\microsoft\projects\realtimeAircraftMap\ChatRoomLocal\obj\Debug\netcoreapp2.0\ChatRoomLocal.dll
 C:\Users\wanl\Documents\microsoft\projects\realtimeAircraftMap\ChatRoomLocal\obj\Debug\netcoreapp2.0\ChatRoomLocal.pdb
 C:\Users\wanl\Documents\microsoft\projects\realtimeAircraftMap\ChatRoomLocal\obj\Debug\netcoreapp2.0\ChatRoomLocal.csprojResolveAssemblyReference.cache
+D:\projects\draw-map\ChatRoomLocal\bin\Debug\netcoreapp2.0\ChatRoomLocal.deps.json
+D:\projects\draw-map\ChatRoomLocal\bin\Debug\netcoreapp2.0\ChatRoomLocal.runtimeconfig.json
+D:\projects\draw-map\ChatRoomLocal\bin\Debug\netcoreapp2.0\ChatRoomLocal.runtimeconfig.dev.json
+D:\projects\draw-map\ChatRoomLocal\bin\Debug\netcoreapp2.0\ChatRoomLocal.dll
+D:\projects\draw-map\ChatRoomLocal\bin\Debug\netcoreapp2.0\ChatRoomLocal.pdb
+D:\projects\draw-map\ChatRoomLocal\obj\Debug\netcoreapp2.0\ChatRoomLocal.csprojResolveAssemblyReference.cache
+D:\projects\draw-map\ChatRoomLocal\obj\Debug\netcoreapp2.0\ChatRoomLocal.csproj.CoreCompileInputs.cache
+D:\projects\draw-map\ChatRoomLocal\obj\Debug\netcoreapp2.0\ChatRoomLocal.AssemblyInfoInputs.cache
+D:\projects\draw-map\ChatRoomLocal\obj\Debug\netcoreapp2.0\ChatRoomLocal.AssemblyInfo.cs
+D:\projects\draw-map\ChatRoomLocal\obj\Debug\netcoreapp2.0\ChatRoomLocal.dll
+D:\projects\draw-map\ChatRoomLocal\obj\Debug\netcoreapp2.0\ChatRoomLocal.pdb

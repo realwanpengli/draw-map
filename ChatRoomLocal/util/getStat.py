@@ -5,7 +5,7 @@ import pickle
 import math
 
 curDirPath = os.path.dirname(__file__)
-data_folder_path = os.path.join(curDirPath, '..', 'data', '*.json');
+data_folder_path = os.path.join(curDirPath, '..', 'data', '*.json')
 print(data_folder_path)
 
 data_files = glob.glob(data_folder_path)
@@ -34,8 +34,8 @@ def getPlaneStat(plane, stat):
 	curTime = plane['PosTime']
 	curPos = [plane['Lat'], plane['Long']]
 	stat[key]['Updated'] = True
-	duration =  curTime - lastTime if lastTime >= 0 else 0; 
-	stat[key]['TotalTime'] = stat[key].get('TotalTime', 0) + duration;
+	duration =  curTime - lastTime if lastTime >= 0 else 0
+	stat[key]['TotalTime'] = stat[key].get('TotalTime', 0) + duration
 	stat[key]['LastTime'] = curTime
 	stat[key]['StartTime'] = curTime if stat[key]['StartTime'] == -1 else stat[key]['StartTime']
 	stat[key]['StartPos'] = curPos if stat[key]['StartPos'] == [999,999] else stat[key]['StartPos']
@@ -51,8 +51,10 @@ def updateStat(stat):
 			if (stat[key]['StartTime']>=0 and stat[key]['LastTime']>=0):
 				dx = stat[key]['StartPos'][0] - stat[key]['EndPos'][0]
 				dy = stat[key]['StartPos'][1] - stat[key]['EndPos'][1]
-				dis = math.sqrt(dx*dx + dy*dy);
-				stat[key]['Sequences'].append([stat[key]['StartTime'], stat[key]['LastTime'], dis])
+				# dis = math.sqrt(dx*dx + dy*dy)
+				stat[key]['Sequences'].append([stat[key]['StartTime'], stat[key]['LastTime'], 
+				stat[key]['StartPos'][0],stat[key]['StartPos'][1],
+				stat[key]['EndPos'][0],stat[key]['EndPos'][1]])
 
 			stat[key]['StartTime'] = -1
 			stat[key]['LastTime'] = -1

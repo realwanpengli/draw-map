@@ -15,7 +15,7 @@ function loadMapScenario() {
         center: cityLocation['NewYork'],
         mapTypeId: Microsoft.Maps.MapTypeId.road,
         liteMode: true,
-        zoom: 8
+        zoom: 6
     });
     return map;
 }
@@ -120,19 +120,16 @@ function movePinToLocation(dest, pin, duration, id) {
 
     var start = null;
     var end = null;
-    var i = 0;
+    // var i = 0;
     var step = function (timestamp) {
         if (!start) {
             start = timestamp;
             end = start + duration;
         }    
         var newLoc = _interpolatePosition(src, dest, timestamp, start, duration);
-        
+        console.log('newloc ', newLoc);
         if (timestamp < end) {
-            i++;
-            if (i % 2 == 0) { 
-                    pin.setLocation(newLoc);
-            }
+            pin.setLocation(newLoc);
             window.requestAnimationFrame(step);
         } else {
             pin.setLocation(dest);
@@ -141,33 +138,7 @@ function movePinToLocation(dest, pin, duration, id) {
     window.requestAnimationFrame(step);
 }
 
-function _isLatValid(lat) {
-    if (lat == undefined || lat > 90 || lat < -90) {
-        return false;
-    } 
-    return true;
-}
 
-function _isLongValid(long) {
-    if (long == undefined || long > 180 || long < -180) {
-        return false;
-    } 
-    return true;
-}
-
-function _containsInScreen(aircraft, bound) {
-    var curLat = aircraft.Lat;
-    var curLong = aircraft.Long;
-    if (!_isLatValid(curLat) || !_isLongValid(curLong)) {
-        // console.log('invalid lat');
-        return false;
-    } 
-    var curLoc = new Microsoft.Maps.Location(curLat, curLong);
-    if (bound.contains(curLoc)) {
-        return true;
-    }
-    return false;
-}
 
 
 function getIconUrl(id) {
@@ -187,32 +158,16 @@ function addPins(aircraftDict, aircraftList, map) {
     var l = aircraftList.length; 
     console.log('aircraft list len = ', aircraftList.length);
     tmpAircraftList = aircraftList.slice();
-    var addedCnt = 0;
     var pins = new Microsoft.Maps.EntityCollection();
     for (var i = 0; i < l; i++) {
-        if (!containsLondon(aircraftList[i].From) && !containsLondon(aircraftList[i].To)) {
-            continue;
-        }
-
         var aircraft = aircraftList[i];
-        // debug
-        if (debug) {
-            if (aircraft.Icao != debugAircraft) {
-                continue;
-            }
-        }
-        // if (!_containsInScreen(aircraft, map.getBounds())) {
-        //     continue;
-        // }
-        if (!_isLatValid(aircraft.Lat) || !_isLongValid(aircraft.Long)) return;
+        
         var location = new Microsoft.Maps.Location(aircraft.Lat, aircraft.Long);
         var aircraftImage = getIconUrl(aircraft.Icao);
-        var city = aircraft.From.includes('Shanghai') || aircraft.To.includes('Shanghai') ? '@Sh' : ''; 
         var pin = new Microsoft.Maps.Pushpin(location, {
                 icon: aircraftImage,
                 title: showTitle? aircraft.Icao: null 
         });
-        addedCnt ++;
         // add aircraft to map and dict
         aircraftDict[aircraft.Icao] = pin;
         pins.push(pin);
@@ -257,120 +212,43 @@ function _addVar(array, data) {
 
 
 function _updateAircraft(newAircraftJson) {
+    // console.log('aircraft json len', newAircraftJson.length);
     var startTime, endTime;
     startTime = new Date();
 
-    // remove pushpins out of screen
-    // remove pushpins no longer exist
-    // todo
-    
-
-
     var newAircraftList;
-    if (newAircraftJson instanceof Array) {
-        // console.log('array', newAircraftJson);
-        newAircraftList = newAircraftJson;
-    } else if (newAircraftJson == undefined) {
-        newAircraftList = aircraftList;
-    }
-    else {
-        // console.log('json', newAircraftJson);
-        newAircraftList =  getAircraftList(newAircraftJson);
-    }
-
+    newAircraftList =  getAircraftList(newAircraftJson);
     tmpAircraftList = newAircraftList.slice();
     console.log('update aircraft');
 
     var pins = new Microsoft.Maps.EntityCollection();
     var l = newAircraftList.length;
+
     for (var i = 0; i < l; i++) {
         // debug
-        if (!containsLondon(newAircraftList[i].From) && !containsLondon(newAircraftList[i].To)) {
-            continue;
+        if (newAircraftList[i]['Icao'] != 'A418B2') {continue;}
+        
+        if (newAircraftList[i]['Icao'] == 'A418B2') {
+            console.log('A418B2', newAircraftList[i]['Lat'], newAircraftList[i]['Long']);
         }
-
-        // if (!_containsInScreen(newAircraftList[i], map.getBounds())) {
-        //     continue;
-        // }
 
         var newLat = newAircraftList[i].Lat;
         var newLong = newAircraftList[i].Long;
-        if (!_isLatValid(newLat) || !_isLongValid(newLong)) {
-            continue;
-        }
-
-
-        var key = newAircraftList[i].Icao;
-        var pin = aircraftDict[key];
-        var aircraftImage = getIconUrl(newAircraftList[i].Icao);
-
-        // debug
-        if (key == '4CA708') {
-            console.log('4CA708', newAircraftList[i]);
-        }
-
-        if (pin == undefined) {
-            var newLoc = new Microsoft.Maps.Location(newLat, newLong);
-            var city = newAircraftList[i].From.includes('Shanghai') || newAircraftList[i].To.includes('Shanghai') ? '@Sh' : ''; 
-            pin = new Microsoft.Maps.Pushpin(newLoc, {
-                    icon: aircraftImage,
-                    title: showTitle? newAircraftList[i].Icao + city: null
-            });
-            pins.push(pin);
-            aircraftDict[key] = pin;
-        }
-    }
-    map.entities.push(pins);
-
-
-    var l = newAircraftList.length;
-    for (var i = 0; i < l; i++) {
-
-        if (newAircraftList[i].Icao == debugAircraft) {
-            console.log(debugAircraft, ' location', newAircraftList[i].Lat, newAircraftList[i].Long, newAircraftList[i]);
-        }
-
-
-        if (!containsLondon(newAircraftList[i].From) && !containsLondon(newAircraftList[i].To)) {
-            continue;
-        }
-
-
-        // if (!_containsInScreen(newAircraftList[i], map.getBounds())) {
-        //     continue;
-        // }
-
-        var newLat = newAircraftList[i].Lat;
-        var newLong = newAircraftList[i].Long;
-        if (!_isLatValid(newLat) || !_isLongValid(newLong)) {
-            continue;
-        }
 
         var key = newAircraftList[i].Icao;
         var pin = aircraftDict[key];
         var newLoc = new Microsoft.Maps.Location(newLat, newLong);
         if (aircraftDict[key] != undefined) {
-            // console.log('move aircraft', key);
             movePinToLocation(newLoc, pin, updateDuration-100, key);
         }
 
     }
 
     endTime = new Date();
-    console.log('updateAircraft time', (endTime - startTime)/1000);
+    // console.log('updateAircraft time', (endTime - startTime)/1000);
 }
 
-function containsLondon(str) {
-    if (str == undefined) return false;
-    // console.log(str);
-    if (str.includes('London') || str.includes('london') || 
-        str.includes('Shanghai') || str.includes('shanghai') ||
-        str.includes('New York') || str.includes('new york') 
-        ) {
-        return true;
-    }
-    return false;
-}
+
 
 
 function panMap(city) {

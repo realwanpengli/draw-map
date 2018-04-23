@@ -62,9 +62,8 @@ function onConnected(connection) {
 
 function bindConnectionMessage(connection) {
     var updateAircraftsCallback = function(name, aircrafts) {
-        console.log('signalR', name);
+        // console.log('signalR', name);
         aircraftJsonStrCache = aircrafts;
-        console.log('aircrafts', aircrafts);
         if (!isInit) {
             initAircraft(aircrafts);
             isInit = true;
@@ -73,14 +72,15 @@ function bindConnectionMessage(connection) {
         }
     };
 
-    var updateBoundRequestCallBack = function(arg) {
+    var updateBoundRequestCallBack = function(ind) {
         var currentBound = map.getBounds();
         var north = currentBound.getNorth();
         var east = currentBound.getEast();
         var south = currentBound.getSouth();
         var west = currentBound.getWest();
         // console.log('updateBoundRequestCallBack', north);
-        connection.send('updateBound', north, east, south, west);
+        // console.log('ind = ', ind)
+        connection.send('updateBound', ind, north, east, south, west);
     }
 
     var echoCallBack = function (arg) {

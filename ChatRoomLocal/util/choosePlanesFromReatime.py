@@ -8,6 +8,7 @@ data_folder_path = os.path.join(curDirPath, '..', 'data', '*.json');
 print(data_folder_path)
 
 data_files = glob.glob(data_folder_path)
+for path in data_files: print(path)
 # data_files.sort()
 # data_files = []
 # for i in range(443):

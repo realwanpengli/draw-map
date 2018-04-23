@@ -33,19 +33,29 @@
             var aircraftJsonStrCache = null;
             var isInit = false;
             var path, cityLocation;
-            var showTitle = false;
+            var showTitle = true;
 
             document.addEventListener('DOMContentLoaded', function () {
+                
+                // $("#showTitle").click(() => {
+                //     showTitle = !showTitle;
+                //     for( key in aircraftDict) {
+                //         aircraftDict[key].setOptions({
+                //             title: showTitle? JSON.parse(aircraftJsonStrCache)[i].Icao + city: null
+                //         });
+                //     }
+                // });                
+                
                 console.log("connecting signalR");
 
                 startConnection('/chat', bindConnectionMessage)
                 .then(onConnected)
                 .catch(onConnectionError);
+
+
             });
             
-            function showTitle() {
-                showTitle = !showTitle;
-            }
+            
         </script>
         
     </head>
@@ -54,7 +64,7 @@
         
         <div id='myMap' style='width: 100vw; height: 90vh;'></div>
         <div id='footer' style='width: 100vw; height: 10vh;'>
-            <button id='showTitle' onclick="showTitle">Show Tiltle</button>
+            <!-- <button id='showTitle' >Show Tiltle</button> -->
             <button id='sendmessage'>Start</button>
             <button id='london' onclick="panMap('London')">London</button>
             <button id='shanghai' onclick="panMap('Shanghai')">Shanghai</button>

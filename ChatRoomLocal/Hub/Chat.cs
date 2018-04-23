@@ -29,14 +29,16 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
         private static JArray jarray;
         private static JObject filteredKeys;
 
+        private static int updateDuration;
         private static int xxx;
-        public void StartUpdate(int updateDuration, 
+        public void StartUpdate(int xxx, 
                                 float North, float East, float South, float West)
         {
             Clients.All.SendAsync("echo", -1);
 
             ind = 0;
             xxx = 567;
+            updateDuration = 5 * 1000;
 
             Console.WriteLine(updateDuration);
             string data = ProcessFile(".\\util\\london-aircraft.json"); 
@@ -46,11 +48,8 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             Console.WriteLine(dataFilteredKeys);
             filteredKeys = JObject.Parse(dataFilteredKeys);
 
-            // jarray = (JArray)JsonConvert.DeserializeObject(data);
-            // Console.WriteLine("jarray = ");
-            // Console.WriteLine(jarray);
             Console.WriteLine("update duration {0}", updateDuration);
-            Clients.All.SendAsync("updateBoundRequest", -1);
+            // Clients.All.SendAsync("updateBoundRequest", -1);
             SetTimer(updateDuration);
         }
 
@@ -59,25 +58,26 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             aTimer = new System.Timers.Timer(interval);
             aTimer.Elapsed += (sender, e) => {
                 Console.WriteLine("update bound request");
-                context.Clients.All.SendAsync("echo", 777);
-                context.Clients.All.SendAsync("updateBoundRequest", -1);
+                // context.Clients.All.SendAsync("echo", 777);
+                context.Clients.All.SendAsync("updateBoundRequest", ind++);
+                if (ind >= jarray.Count) {
+                    ind = 0;
+                }
             };
             aTimer.AutoReset = true;
             aTimer.Enabled = true;
         }
 
 
-        public void UpdateBound(float North, float East, float South, float West) {
+        public void UpdateBound(int Ind, float North, float East, float South, float West) {
             
             // Console.WriteLine("UpdateBound jarray = ");
             // Console.WriteLine(jarray);
-            Console.WriteLine(ind);
+            Console.WriteLine(Ind);
 
             // todo: send different client different data according to their bound
-            if (ind >= jarray.Count) {
-                ind = 0;
-            }
-            var verifiedList = PreprocessAircraftList((JArray)jarray[ind++], North, East, South, West);
+            
+            var verifiedList = PreprocessAircraftList((JArray)jarray[Ind], North, East, South, West);
             var json = verifiedList.ToString();
 
             // send to server
