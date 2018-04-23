@@ -15,7 +15,7 @@ function loadMapScenario() {
         center: new Microsoft.Maps.Location(51.5074, 0.1278),
         mapTypeId: Microsoft.Maps.MapTypeId.road,
         liteMode: true,
-        zoom: 9
+        zoom: 12
     });
     return map;
 }
@@ -114,7 +114,7 @@ function movePinToLocation(dest, pin, duration, id) {
     var latVec = -src.latitude + dest.latitude;
     var longVec = -src.longitude + dest.longitude;
     
-    console.log(id, 'distance', Math.sqrt(latVec * latVec + longVec * longVec));
+    // console.log(id, 'distance', Math.sqrt(latVec * latVec + longVec * longVec));
 
     rotatePushpin(pin, dest, getIconUrl(id), compAngle(src, dest));
 
@@ -201,16 +201,16 @@ function addPins(aircraftDict, aircraftList, map) {
                 continue;
             }
         }
-        if (!_containsInScreen(aircraft, map.getBounds())) {
-            continue;
-        }
+        // if (!_containsInScreen(aircraft, map.getBounds())) {
+        //     continue;
+        // }
         if (!_isLatValid(aircraft.Lat) || !_isLongValid(aircraft.Long)) return;
         var location = new Microsoft.Maps.Location(aircraft.Lat, aircraft.Long);
         var aircraftImage = getIconUrl(aircraft.Icao);
         var city = aircraft.From.includes('Shanghai') || aircraft.To.includes('Shanghai') ? '@Sh' : ''; 
         var pin = new Microsoft.Maps.Pushpin(location, {
                 icon: aircraftImage,
-                title: aircraft.Icao 
+                title: showTitle? aircraft.Icao: null 
         });
         addedCnt ++;
         // add aircraft to map and dict
@@ -260,8 +260,12 @@ function _updateAircraft(newAircraftJson) {
     var startTime, endTime;
     startTime = new Date();
 
-    // remove all pushpin
+    // remove pushpins out of screen
+    // remove pushpins no longer exist
     // todo
+    
+
+
     var newAircraftList;
     if (newAircraftJson instanceof Array) {
         // console.log('array', newAircraftJson);
@@ -285,9 +289,9 @@ function _updateAircraft(newAircraftJson) {
             continue;
         }
 
-        if (!_containsInScreen(newAircraftList[i], map.getBounds())) {
-            continue;
-        }
+        // if (!_containsInScreen(newAircraftList[i], map.getBounds())) {
+        //     continue;
+        // }
 
         var newLat = newAircraftList[i].Lat;
         var newLong = newAircraftList[i].Long;
@@ -299,12 +303,18 @@ function _updateAircraft(newAircraftJson) {
         var key = newAircraftList[i].Icao;
         var pin = aircraftDict[key];
         var aircraftImage = getIconUrl(newAircraftList[i].Icao);
+
+        // debug
+        if (key == '4CA708') {
+            console.log('4CA708', newAircraftList[i]);
+        }
+
         if (pin == undefined) {
             var newLoc = new Microsoft.Maps.Location(newLat, newLong);
             var city = newAircraftList[i].From.includes('Shanghai') || newAircraftList[i].To.includes('Shanghai') ? '@Sh' : ''; 
             pin = new Microsoft.Maps.Pushpin(newLoc, {
                     icon: aircraftImage,
-                    title: newAircraftList[i].Icao + city
+                    title: showTitle? newAircraftList[i].Icao + city: null
             });
             pins.push(pin);
             aircraftDict[key] = pin;
@@ -326,9 +336,9 @@ function _updateAircraft(newAircraftJson) {
         }
 
 
-        if (!_containsInScreen(newAircraftList[i], map.getBounds())) {
-            continue;
-        }
+        // if (!_containsInScreen(newAircraftList[i], map.getBounds())) {
+        //     continue;
+        // }
 
         var newLat = newAircraftList[i].Lat;
         var newLong = newAircraftList[i].Long;

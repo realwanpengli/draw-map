@@ -4,6 +4,9 @@
 ## DDL
 5.7 
 
+## IMPORTANT
+- [ ] Prepare data!!!
+
 ## Todo List with DDL
 - [x] Small dataset with good long flight (4.20)
 - [ ] **?** Logic code move to server (4.20): **different city different hub?**

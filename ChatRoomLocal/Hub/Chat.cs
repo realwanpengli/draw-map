@@ -64,7 +64,7 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             
             // Console.WriteLine("UpdateBound jarray = ");
             // Console.WriteLine(jarray);
-            Console.WriteLine(xxx);
+            Console.WriteLine(ind);
 
             // todo: send different client different data according to their bound
             if (ind >= jarray.Count) {
@@ -73,6 +73,7 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             var verifiedList = PreprocessAircraftList((JArray)jarray[ind++], North, East, South, West);
             var json = verifiedList.ToString();
 
+            // send to server
             Clients.Client(Context.ConnectionId).SendAsync("updateAircraft", -1, json);
         }
 
@@ -130,12 +131,14 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             JArray arr = new JArray();
             foreach (var aircraft in aircraftList)
             {
-                Console.WriteLine("Edge North {0} East {1}  South {2} West {3}", North, East, South, West);
-                Console.WriteLine("aircraft ({0}, {1})", (float)aircraft["Lat"], (float)aircraft["Long"]);
+                // Console.WriteLine("Edge North {0} East {1}  South {2} West {3}", North, East, South, West);
+                // Console.WriteLine("aircraft ({0}, {1})", (float)aircraft["Lat"], (float)aircraft["Long"]);
                 PointF loc = new PointF((float)aircraft["Lat"], (float)aircraft["Long"]);
-                if (IsInScreen(loc, North, East, South, West)) 
+
+                // if (IsInScreen(loc, North, East, South, West)) 
+                if (IsLatValid(loc.X) && IsLongValid(loc.Y)) 
                 {
-                    Console.WriteLine("add aircraft");
+                    // Console.WriteLine("add aircraft");
                     arr.Add(aircraft);
                 }
             }
