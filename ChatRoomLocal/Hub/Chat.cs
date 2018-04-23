@@ -24,124 +24,64 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
 
         private static System.Timers.Timer aTimer;
         
-        private bool reset;
-        private int ind;
-        private float North, South, West, East;
-        private JArray jarray;
+        private static int ind;
+        // private float North, South, West, East;
+        private static JArray jarray;
+
+        private static int xxx;
         public void StartUpdate(int updateDuration, 
-                                float North_, float East_, float South_, float West_)
+                                float North, float East, float South, float West)
         {
             Clients.All.SendAsync("echo", -1);
 
-            North = North_;
-            East = East_;
-            South = South_;
-            West = West_;
             ind = 0;
-            reset = false;
+            xxx = 567;
 
             Console.WriteLine(updateDuration);
             string data = ProcessFile(".\\util\\london-aircraft.json"); 
             jarray = JArray.Parse(data);
             // jarray = (JArray)JsonConvert.DeserializeObject(data);
+            // Console.WriteLine("jarray = ");
             // Console.WriteLine(jarray);
             Console.WriteLine("update duration {0}", updateDuration);
             SetTimer(updateDuration);
-            
-            
-            // for (int i = 0; i < jarray.Count; i++)
-            // {
-            //     var json = jarray[i].ToString();
-            //     Console.Write("i=");
-            //     Console.WriteLine(i);
-            //     Client.All.SendAsync("updateBoundRequest");
-            //     // Clients.All.SendAsync("StartUpdate", i, json);
-            //     Thread.Sleep(updateDuration);
-            // }
         }
 
         private void SetTimer(int interval)
         {
-            // Create a timer with a two second interval.
             aTimer = new System.Timers.Timer(interval);
-            // Hook up the Elapsed event for the timer. 
-            // aTimer.Elapsed += OnTimedEvent;
-            int iii = 0;
             aTimer.Elapsed += (sender, e) => {
-                Console.WriteLine("on time event...{0}", iii++);
-                // Clients.All.SendAsync("echo", 888).Wait();
+                Console.WriteLine("update bound request");
                 context.Clients.All.SendAsync("echo", 777);
+                context.Clients.All.SendAsync("updateBoundRequest", -1);
             };
-            // aTimer.Elapsed += (sender, e) => OnTimedEvent(sender, e, Clients);
-            // aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             aTimer.AutoReset = true;
             aTimer.Enabled = true;
         }
 
 
-
-        public void OnTimedEvent(Object source, ElapsedEventArgs e)
-        {
-            Console.WriteLine("on time event");
-            Clients.All.SendAsync("echo", 888);
-             OnTimedEventtt(source, e, Clients);
-            // Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
-                        //   e.SignalTime);
-            // Clients.All.SendAsync("updateBoundRequest", -1);
-            // UpdateBoundRequest(hub);
-        }
-
-        private void OnTimedEventtt(Object source, ElapsedEventArgs e, IHubCallerClients Clients)
-        {
-            Console.WriteLine("on time event");
-            Clients.All.SendAsync("echo", 999);
-            // Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
-                        //   e.SignalTime);
-            // Clients.All.SendAsync("updateBoundRequest", -1);
-            // UpdateBoundRequest(hub);
-        }
-
-        public void UpdateBoundRequest() {
-            Console.WriteLine("update bound request");
-            // Clients.All.SendAsync("updateBoundRequest", -1);
-            Clients.All.SendAsync("echo", 999);
-        }
-
-        public void UpdateBound(float North_, float East_, float South_, float West_) {
-            North = North_;
-            East = East_;
-            South = South_;
-            West = West_;
+        public void UpdateBound(float North, float East, float South, float West) {
             
+            // Console.WriteLine("UpdateBound jarray = ");
+            // Console.WriteLine(jarray);
+            Console.WriteLine(xxx);
+
             // todo: send different client different data according to their bound
+            if (ind >= jarray.Count) {
+                ind = 0;
+            }
             var verifiedList = PreprocessAircraftList((JArray)jarray[ind++], North, East, South, West);
             var json = verifiedList.ToString();
 
-            Clients.All.SendAsync("updateAircraft", -1, json);
+            Clients.Client(Context.ConnectionId).SendAsync("updateAircraft", -1, json);
         }
 
         public void Echo(string name, 
             float North_, float East_, float South_, float West_)
         {
-            North = North_;
-            East = East_;
-            South = South_;
-            West = West_;
             Console.WriteLine("Update bound");
         }
 
-
-        // private void ProcessDirectory(string targetDirectory, int updateDuration) 
-        // {
-        //     // Process the list of files found in the directory.
-        //     string [] fileEntries = Directory.GetFiles(targetDirectory);
-        //     foreach(string fileName in fileEntries) {
-        //         string contents = ProcessFile(fileName);
-        //         Clients.All.SendAsync("broadcastMessage", fileName, contents);
-        //         Console.WriteLine("sleep");
-        //         Thread.Sep(updateDuration);
-        //     }
-        // }
 
         private string ProcessFile(string path) 
         {
@@ -166,17 +106,22 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             return false;
         }
 
-        private bool IsInScreen(PointF pt) 
+        private bool IsInScreen(PointF pt, float North, float East, float South, float West) 
         {
             // is location valid
-            if (!IsLatValid(pt.X) || !IsLongValid(pt.Y)) 
+            if (!IsLatValid(pt.X) || !IsLongValid(pt.Y)) {
+                Console.WriteLine("location invalid");
                 return false;
+            }
+
+            float lat = pt.X;
+            float long_ = pt.Y;
 
             if (West < East)
-                return pt.X < East && pt.X > West && pt.Y < North && pt.Y > South;
+                return long_ < East && long_ > West && lat < North && lat > South;
 
             // it crosses the date line
-            return (pt.X < East || pt.X > West) && pt.Y < North && pt.Y > South;    
+            return (long_ < East || long_ > West) && lat < North && lat > South;    
 
         }
 
@@ -185,17 +130,16 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             JArray arr = new JArray();
             foreach (var aircraft in aircraftList)
             {
+                Console.WriteLine("Edge North {0} East {1}  South {2} West {3}", North, East, South, West);
+                Console.WriteLine("aircraft ({0}, {1})", (float)aircraft["Lat"], (float)aircraft["Long"]);
                 PointF loc = new PointF((float)aircraft["Lat"], (float)aircraft["Long"]);
-                if (IsInScreen(loc)) 
+                if (IsInScreen(loc, North, East, South, West)) 
                 {
+                    Console.WriteLine("add aircraft");
                     arr.Add(aircraft);
                 }
             }
             return arr;
         }
-
-        
-
-        
     }
 }
