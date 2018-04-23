@@ -11,7 +11,8 @@ namespace console
    public static void Main()
    {
       SetTimer();
-
+      String timeStamp = (DateTime.Now).ToString("yyyyMMddHHmmssffff");
+    Console.WriteLine(timeStamp);
       Console.WriteLine("\nPress the Enter key to exit the application...\n");
       Console.WriteLine("The application started at {0:HH:mm:ss.fff}", DateTime.Now);
       Console.ReadLine();

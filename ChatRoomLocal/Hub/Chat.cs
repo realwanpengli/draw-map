@@ -27,6 +27,7 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
         private static int ind;
         // private float North, South, West, East;
         private static JArray jarray;
+        private static JObject filteredKeys;
 
         private static int xxx;
         public void StartUpdate(int updateDuration, 
@@ -40,10 +41,16 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             Console.WriteLine(updateDuration);
             string data = ProcessFile(".\\util\\london-aircraft.json"); 
             jarray = JArray.Parse(data);
+
+            string dataFilteredKeys = ProcessFile(".\\util\\filtered-plane.json"); 
+            Console.WriteLine(dataFilteredKeys);
+            filteredKeys = JObject.Parse(dataFilteredKeys);
+
             // jarray = (JArray)JsonConvert.DeserializeObject(data);
             // Console.WriteLine("jarray = ");
             // Console.WriteLine(jarray);
             Console.WriteLine("update duration {0}", updateDuration);
+            Clients.All.SendAsync("updateBoundRequest", -1);
             SetTimer(updateDuration);
         }
 
@@ -133,13 +140,17 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             {
                 // Console.WriteLine("Edge North {0} East {1}  South {2} West {3}", North, East, South, West);
                 // Console.WriteLine("aircraft ({0}, {1})", (float)aircraft["Lat"], (float)aircraft["Long"]);
+                
                 PointF loc = new PointF((float)aircraft["Lat"], (float)aircraft["Long"]);
 
                 // if (IsInScreen(loc, North, East, South, West)) 
                 if (IsLatValid(loc.X) && IsLongValid(loc.Y)) 
                 {
-                    // Console.WriteLine("add aircraft");
-                    arr.Add(aircraft);
+                    var msgProperty = filteredKeys.Property((string)aircraft["Icao"]);
+                    // Console.WriteLine(msgProperty);
+                    if (msgProperty != null) {
+                        arr.Add(aircraft);
+                    }
                 }
             }
             return arr;

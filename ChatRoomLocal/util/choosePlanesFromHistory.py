@@ -2,6 +2,7 @@ import os
 import glob
 import json
 import pickle
+import math
 
 curDirPath = os.path.dirname(__file__)
 data_folder_path = os.path.join(curDirPath, '..', 'data', '*.json');
@@ -60,17 +61,19 @@ for path in data_files:
 			'LastTime': -1,
 			'Updated': False,
 			'Sequences': [],
-			'StartTime': -1
+			'StartTime': -1,
+			'StartPos': [999,999],
+			'EndPos': [999,999]
 		}
 
 
 save_obj(stat, 'stat_icao')
 
 # filter parameter
-minDataCnt = 1000
-minTotalTime = 3 * 60 * 60;
-minSequenceDuration = 30 * 60;
-minSequenceCnt = 1;
+# minDataCnt = 1000
+# minTotalTime = 3 * 60 * 60;
+# minSequenceDuration = 30 * 60;
+# minSequenceCnt = 1;
 
 # minDataCnt = -1
 # minTotalTime = -1000 * 60 * 1000;
@@ -78,85 +81,41 @@ minSequenceCnt = 1;
 # minSequenceCnt = -3;
 
 
-def getPlaneStat(plane, stat):
-	if 'PosTime' not in plane: return
-	key = plane['Icao']
-	lastTime = stat[key]['LastTime']
-	curTime = plane['PosTime']
-	stat[key]['Updated'] = True
-	duration =  curTime - lastTime if lastTime >= 0 else 0; 
-	stat[key]['TotalTime'] = stat[key].get('TotalTime', 0) + duration;
-	stat[key]['LastTime'] = curTime
-	stat[key]['StartTime'] = curTime if stat[key]['StartTime'] == -1 else stat[key]['StartTime']
-	
-
-# update lastTime
-# update sequences 
-def updateStat(stat):
-	for key in stat:
-		if stat[key]['Updated'] == True:
-			stat[key]['LastTime'] =  stat[key]['LastTime']
-		else:
-			if (stat[key]['StartTime']>=0 and stat[key]['LastTime']>=0):
-				stat[key]['Sequences'].append([stat[key]['StartTime'], stat[key]['LastTime']])
-			stat[key]['StartTime'] = -1
-			stat[key]['LastTime'] = -1
-	
-	for key in stat:
-		stat[key]['Updated'] = False
-
-
-# get planes statics
-ind = 0
-print('get stat')
-for path in data_files:
-	if debug:
-		ind += 1
-		if ind > maxLen: 
-			break
-	acList = getAcList(path)
-	for ac in acList:
-		key = ac['Icao']
-		getPlaneStat(ac, stat)
-	updateStat(stat)
-updateStat(stat)
-
-save_obj(stat, 'stat')
 
 # print(stat, len(stat))
 
 
-filteredPlane = []
+# filteredPlane = []
 
-def filterPlanes(plane, stat, filteredPlane):
-	# filteredPlane = []
-	key = ac['Icao']
-	if stat[key]['Count'] < minDataCnt: return
-	if stat[key]['TotalTime'] < minTotalTime: return
-	if len(stat[key]['Sequences']) < minSequenceCnt: return
-	cnt = 0
-	for seq in stat[key]['Sequences']:
-		if seq[1] - seq[0] >= minSequenceDuration: cnt += 1
-	if cnt < minSequenceCnt: return
-	filteredPlane.append(key)
-	# print(filteredPlane)
+# def filterPlanes(plane, stat, filteredPlane):
+# 	# filteredPlane = []
+# 	key = ac['Icao']
+# 	if stat[key]['Count'] < minDataCnt: return
+# 	if stat[key]['TotalTime'] < minTotalTime: return
+# 	if len(stat[key]['Sequences']) < minSequenceCnt: return
+# 	cnt = 0
+# 	for seq in stat[key]['Sequences']:
+# 		if seq[1] - seq[0] >= minSequenceDuration: cnt += 1
+# 	if cnt < minSequenceCnt: return
+# 	filteredPlane.append(key)
+# 	# print(filteredPlane)
 
-# filter planes
-print('filter planes')
-ind = 0
-for path in data_files:
-	if debug:
-		ind += 1
-		if ind > maxLen: 
-			break
-	acList = getAcList(path)
-	for ac in acList:
-		key = ac['Icao']
-		filterPlanes(ac, stat, filteredPlane)
+# # filter planes
+# print('filter planes')
+# ind = 0
+# for path in data_files:
+# 	if debug:
+# 		ind += 1
+# 		if ind > maxLen: 
+# 			break
+# 	acList = getAcList(path)
+# 	for ac in acList:
+# 		key = ac['Icao']
+# 		filterPlanes(ac, stat, filteredPlane)
 
-content = ""
-for item in filteredPlane:
-	content += item + "\n"
+# content = ""
+# for item in filteredPlane:
+# 	content += item + "\n"
 
-with open(os.path.join(curDirPath, 'filtered-plane.json'), 'w') as f:
-	f.write(content)
+# with open(os.path.join(curDirPath, 'filtered-plane.json'), 'w') as f:
+# 	f.write(content)

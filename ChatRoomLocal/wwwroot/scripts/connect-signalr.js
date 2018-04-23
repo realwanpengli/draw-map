@@ -61,15 +61,15 @@ function onConnected(connection) {
 }
 
 function bindConnectionMessage(connection) {
-    var updateAircraftsCallback = function(name, message) {
+    var updateAircraftsCallback = function(name, aircrafts) {
         console.log('signalR', name);
-        aircraftJsonStrCache = message;
-        // console.log('aircraftJsonStrCache', aircraftJsonStrCache);
+        aircraftJsonStrCache = aircrafts;
+        console.log('aircrafts', aircrafts);
         if (!isInit) {
-            initAircraft(message);
+            initAircraft(aircrafts);
             isInit = true;
         } else {
-            updateAircraft(message);
+            updateAircraft(aircrafts);
         }
     };
 

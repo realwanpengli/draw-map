@@ -18,3 +18,4 @@ C:\Users\wanl\Documents\microsoft\projects\realtimeAircraftMap\ChatRoomLocal\obj
 C:\Users\wanl\Documents\microsoft\projects\realtimeAircraftMap\ChatRoomLocal\obj\Debug\netcoreapp2.0\ChatRoomLocal.AssemblyInfo.cs
 C:\Users\wanl\Documents\microsoft\projects\realtimeAircraftMap\ChatRoomLocal\obj\Debug\netcoreapp2.0\ChatRoomLocal.dll
 C:\Users\wanl\Documents\microsoft\projects\realtimeAircraftMap\ChatRoomLocal\obj\Debug\netcoreapp2.0\ChatRoomLocal.pdb
+C:\Users\wanl\Documents\microsoft\projects\realtimeAircraftMap\ChatRoomLocal\obj\Debug\netcoreapp2.0\ChatRoomLocal.csprojResolveAssemblyReference.cache

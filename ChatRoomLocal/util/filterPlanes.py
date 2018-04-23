@@ -7,7 +7,7 @@ def load_obj(name ):
     with open(name + '.pkl', 'rb') as f:
         return pickle.load(f)
 
-filteredPlane = []
+filteredPlane = {}
 
 # filter parameter
 minDataCnt = 5 * 60
@@ -29,7 +29,7 @@ def filterPlanes(stat, filteredPlane):
         for seq in stat[key]['Sequences']:
             if seq[1] - seq[0] >= minSequenceDuration: cnt += 1
         if cnt < minSequenceCnt: continue
-        filteredPlane.append(key)
+        filteredPlane[key]=1
     print("longFlightCnt = ", longFlightCnt)
 # filter planes
 print('filter planes')

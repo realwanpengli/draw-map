@@ -12,10 +12,10 @@ function GetMap() {
 
 function loadMapScenario() {
     map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
-        center: new Microsoft.Maps.Location(51.5074, 0.1278),
+        center: cityLocation['NewYork'],
         mapTypeId: Microsoft.Maps.MapTypeId.road,
         liteMode: true,
-        zoom: 12
+        zoom: 8
     });
     return map;
 }
