@@ -119,33 +119,33 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             changeInterval(updateDuration/speedup);
         }
 
-        private static JObject jarr2jobj(JArray a) {
-            JObject objA = new JObject();
-            foreach (JObject x in a) {
-                JObject loc = new JObject();
-                loc["Lat"] = x["Lat"];
-                loc["Long"] = x["Long"];
-                if (hasKey("PosTime", x)) loc["Postime"] = x["PosTime"];
-                objA[x["Icao"]] = loc;
-            }
-            return objA;
-        }
-        private static float getDurationScale(JArray a, JArray b) {
-           JObject objA = jarr2jobj(a);
-           JObject objB = jarr2jobj(b);
-           float 
-            foreach (var x in objA) {
-                if (hasKey(x.Key, objB)) {
-                    float lat1 = (float)x.Value["Lat"];
-                    float long1 = (float)x.Value["Long"];
-                    float postime1 = (float)x.Value["PosTime"];
-                    float lat2 = (float)objB["Lat"];
-                    float long2 = (float)objB["Long"];
-                    float postime2 = (float)objB["PosTime"];
-                    dis += 
-                }
-            }
-        }
+        // private static JObject jarr2jobj(JArray a) {
+        //     JObject objA = new JObject();
+        //     foreach (JObject x in a) {
+        //         JObject loc = new JObject();
+        //         loc["Lat"] = x["Lat"];
+        //         loc["Long"] = x["Long"];
+        //         if (hasKey("PosTime", x)) loc["Postime"] = x["PosTime"];
+        //         objA[x["Icao"]] = loc;
+        //     }
+        //     return objA;
+        // }
+        // private static float getDurationScale(JArray a, JArray b) {
+        //    JObject objA = jarr2jobj(a);
+        //    JObject objB = jarr2jobj(b);
+        //    float 
+        //     foreach (var x in objA) {
+        //         if (hasKey(x.Key, objB)) {
+        //             float lat1 = (float)x.Value["Lat"];
+        //             float long1 = (float)x.Value["Long"];
+        //             float postime1 = (float)x.Value["PosTime"];
+        //             float lat2 = (float)objB["Lat"];
+        //             float long2 = (float)objB["Long"];
+        //             float postime2 = (float)objB["PosTime"];
+        //             // dis += 
+        //         }
+        //     }
+        // }
         public void Echo(string name, 
             float North_, float East_, float South_, float West_)
         {
