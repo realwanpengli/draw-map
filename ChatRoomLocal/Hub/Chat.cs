@@ -41,8 +41,8 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             xxx = 567;
             updateDuration = 1 * 1000;
             curTimestamp = -1;
-            speedup = 16;
-            realDuration = 4 * 10 * 1000;
+            speedup = 6;
+            realDuration = 3 * 10 * 1000;
             lastAircraftList = null;
 
             Console.WriteLine(updateDuration);
@@ -114,7 +114,7 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
                 Console.WriteLine("reset  duration");
             }
             Clients.Client(Context.ConnectionId).SendAsync("updateAircraft", updateDuration/speedup, json);
-            float durationScale = getDurationScale(verifiedList, lastAircraftList);
+            // float durationScale = getDurationScale(verifiedList, lastAircraftList);
             lastAircraftList = (JArray)verifiedList.DeepClone();
             changeInterval(updateDuration/speedup);
         }

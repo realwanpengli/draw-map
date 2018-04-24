@@ -4,7 +4,8 @@ function GetMap() {
     cityLocation = {
         'London': new Microsoft.Maps.Location(51.5074, 0.1278),
         'Shanghai': new Microsoft.Maps.Location(31.2304, 121.4737),
-        'NewYork': new Microsoft.Maps.Location(40.7128, -74.0060)
+        'NewYork': new Microsoft.Maps.Location(40.7128, -74.0060),
+        'Columbus': new Microsoft.Maps.Location(39.9611755, -82.9987942)
     };
 
     loadMapScenario();
@@ -12,7 +13,7 @@ function GetMap() {
 
 function loadMapScenario() {
     map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
-        center: cityLocation['London'],
+        center: cityLocation['Columbus'],
         mapTypeId: Microsoft.Maps.MapTypeId.road,
         liteMode: true,
         zoom: 6

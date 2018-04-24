@@ -11,16 +11,18 @@ print(data_folder_path)
 data_files = glob.glob(data_folder_path)
 
 if fromMyData:
-	tmp = glob.glob('json/*.json')
+	folder = 'json1'
+	tmp = glob.glob(os.path.join(folder, '*.json'))
 	totalCnt = len(tmp)
 	data_files = []
 	for i in range(1,totalCnt+1):
-		data_files.append('json/aircraft-{}.json'.format(i));
+		data_files.append(os.path.join(folder, 'aircraft-{}.json'.format(i)));
 
 plane_list = ['405A48', '400A25', '40095D', '010160', '3C6643','40097E', '4CA215', '40701B', '3991E5', '406531'];
 
-l = 100
-speedup = 4;
+l = 300
+offset = 3
+speedup = 3
 record = [{}] * l
 
 def plane_filter(ac, plane_list, city):
@@ -38,19 +40,18 @@ print('data_files len', len(data_files))
 for i in range(len(data_files)):
 	if i >= l:
 		break
-	path = data_files[i*speedup]
+	path = data_files[i*speedup+offset]
 	print(path)
 	contents = None
-	with open(path, 'r', encoding='UTF-8') as f:
-		contents = f.read()
-	j = json.loads(contents)
+	j = None
+	with open(path, 'r', encoding='UTF-8') as json_data: j = json.load(json_data)
 	acList = j['acList']
 	tmp = []
 
 	
 	cnt = 0;
 	for ac in acList:
-		if plane_filter(ac, plane_list, 'London'):
+		if True or plane_filter(ac, plane_list, 'NewYork'):
 			tmp.append({ 
 				'Icao': ac.get('Icao', '000000'),
 				'Lat' : ac.get('Lat', 0.),
