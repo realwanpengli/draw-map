@@ -15,7 +15,7 @@ function loadMapScenario() {
         center: cityLocation['London'],
         mapTypeId: Microsoft.Maps.MapTypeId.road,
         liteMode: true,
-        zoom: 10
+        zoom: 6
     });
     return map;
 }

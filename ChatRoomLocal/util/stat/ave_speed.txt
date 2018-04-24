@@ -1,0 +1,2 @@
+average apeed of flights longer than 30min; unit: m/ms;
+0.192782689978086

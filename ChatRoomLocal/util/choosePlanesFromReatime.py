@@ -11,15 +11,15 @@ print(data_folder_path)
 data_files = glob.glob(data_folder_path)
 
 if fromMyData:
+	tmp = glob.glob('json/*.json')
+	totalCnt = len(tmp)
 	data_files = []
-	for i in range(1,443):
+	for i in range(1,totalCnt+1):
 		data_files.append('json/aircraft-{}.json'.format(i));
-# print(data_files)
 
 plane_list = ['405A48', '400A25', '40095D', '010160', '3C6643','40097E', '4CA215', '40701B', '3991E5', '406531'];
 
-l = len(data_files)
-l = 50
+l = 100
 speedup = 4;
 record = [{}] * l
 
@@ -35,7 +35,7 @@ def plane_filter(ac, plane_list, city):
 print('data_files len', len(data_files))
 
 
-for i in range(l):
+for i in range(len(data_files)):
 	if i >= l:
 		break
 	path = data_files[i*speedup]

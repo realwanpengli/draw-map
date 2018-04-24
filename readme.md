@@ -27,3 +27,6 @@
 ## Issue
 - [x] Planes flying uncontinuesly: `data is caputured uncontinuesly`
 - [ ] Planes fly sometimes quick sometimes slow, since the history data doesn't point out the timestamp.
+
+## Tips
+* SpeedUp = 4 in /util/chooseDataFromRealtimeData.py; SpeedUp = 16 in Chat.cs  

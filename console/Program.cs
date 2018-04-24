@@ -10,7 +10,30 @@ namespace console
 
    public static void Main()
    {
-      SetTimer();
+
+        string json = @"[
+            'Small',
+            'Medium',
+            'Large'
+        ]";
+
+        JArray a = JArray.Parse(json);
+        JArray b = (JArray)a.DeepClone();
+        b[0]="11";
+        Console.WriteLine(a);
+        Console.WriteLine(b);
+
+        JObject obj1 = new JObject();
+        obj1["a"] = 1;
+        obj1["b"] = 2;
+        foreach (var o in obj1)
+        {
+            Console.WriteLine(o.Key);
+            Console.WriteLine(o.Value);
+        }
+        Console.WriteLine(obj1);
+
+    //   SetTimer();
 
     // get timestamp
     Int32 unixTimestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;

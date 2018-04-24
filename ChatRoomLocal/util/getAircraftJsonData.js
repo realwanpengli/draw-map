@@ -13,7 +13,7 @@ var saveJsonFun = function() {
 	        // console.log(body) // Print the json response
 	        console.log('get json ok');
 	     	var strJson = JSON.stringify(body);
-	     	fs.writeFile('./json/aircraft-'+ ind+'.json', strJson, 'utf8', function(err) {
+	     	fs.writeFile('./json1/aircraft-'+ ind+'.json', strJson, 'utf8', function(err) {
 	     		if (!err) {
 		     		console.log('saving json ok');
 		     		ind++;

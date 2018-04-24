@@ -19,19 +19,19 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
         public Chat(IHubContext<Chat> context)
         {
             this.context = context;
-
         }
 
         private static System.Timers.Timer aTimer;
         
         private static int ind;
-        // private float North, South, West, East;
         private static JArray jarray;
         private static JObject filteredKeys;
-
         private static int updateDuration;
         private static int xxx;
         private static long curTimestamp;
+        private static int speedup;
+        private static int realDuration;
+        private static JArray lastAircraftList;
         public void StartUpdate(int xxx, 
                                 float North, float East, float South, float West)
         {
@@ -41,17 +41,18 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             xxx = 567;
             updateDuration = 1 * 1000;
             curTimestamp = -1;
+            speedup = 16;
+            realDuration = 4 * 10 * 1000;
+            lastAircraftList = null;
 
             Console.WriteLine(updateDuration);
             string data = ProcessFile(".\\util\\london-aircraft.json"); 
             jarray = JArray.Parse(data);
 
-            string dataFilteredKeys = ProcessFile(".\\util\\filtered-plane.json"); 
-            // Console.WriteLine(dataFilteredKeys);
+            string dataFilteredKeys = ProcessFile(".\\util\\stat\\filtered-plane.json"); 
             filteredKeys = JObject.Parse(dataFilteredKeys);
 
             Console.WriteLine("update duration {0}", updateDuration);
-            // Clients.All.SendAsync("updateBoundRequest", ind++);
             SetTimer(updateDuration);
         }
 
@@ -59,8 +60,6 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
         {
             aTimer = new System.Timers.Timer(interval);
             aTimer.Elapsed += (sender, e) => {
-                Console.WriteLine("update bound request");
-                // context.Clients.All.SendAsync("echo", 777);
                 context.Clients.All.SendAsync("updateBoundRequest", ind++);
                 if (ind >= jarray.Count) {
                     ind = 0;
@@ -75,38 +74,22 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             aTimer.Start();
         }
 
-        // public void SetTimer(int interval)
-        // {
-        //     while(true) {
-        //         Console.WriteLine("update bound request");
-        //         Clients.All.SendAsync("updateBoundRequest", ind++);
-        //         if (ind >= jarray.Count) {
-        //             ind = 0;
-
-        //         }
-        //         Thread.Sleep(updateDuration);
-                
-        //     };
-        // }
-
         public void UpdateBound(int Ind, float North, float East, float South, float West) {
             
-            // Console.WriteLine("UpdateBound jarray = ");
-            // Console.WriteLine(jarray);
             Console.WriteLine(Ind);
-            // todo: send different client different data according to their bound
+            JArray verifiedList;
+            string json;
+
             while (true) {
-                var verifiedList = PreprocessAircraftList((JArray)jarray[Ind], North, East, South, West);
-                var json = verifiedList.ToString();
+                verifiedList = PreprocessAircraftList((JArray)jarray[Ind], North, East, South, West);
+                json = verifiedList.ToString();
                 int indPro = 0;
                 while (true) {
                     if ((long)(((JArray)verifiedList)[indPro]["PosTime"]) > -1) {
                         updateDuration = (int)(((long)(((JArray)verifiedList)[indPro]["PosTime"]) - (long)curTimestamp));
-                        updateDuration /= 4;
                         break;
                     }
                     indPro++;
-                    Console.WriteLine("indPro = {0}", indPro);
                 }
                 if (curTimestamp < 0) {
                     curTimestamp = (long)((((JArray)verifiedList))[indPro]["PosTime"]);
@@ -114,27 +97,55 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
                     continue;
                 }
                 curTimestamp = (long)((((JArray)verifiedList))[indPro]["PosTime"]);
-                Console.WriteLine("XXX duration {0}", updateDuration);
                 Ind++;
                 verifiedList = PreprocessAircraftList((JArray)jarray[Ind], North, East, South, West);
                 json = verifiedList.ToString();
 
-                Console.WriteLine("Ind = {0}", Ind);
                 
-                if (updateDuration < 6 * 1000) {
+                if ((float)updateDuration < (float)realDuration * 0.7) {
                     ind++;
                     continue;
                 }
-                // send to server
-                Clients.Client(Context.ConnectionId).SendAsync("updateAircraft", updateDuration, json);
                 break;
             };
-            Console.WriteLine("timer duration {0}", updateDuration);
-            Console.WriteLine("cur timestamp {0}", curTimestamp);
-            if (updateDuration > 50 * 1000) updateDuration = 200;
-            changeInterval(updateDuration);
+            Console.WriteLine("timer duration {0}", updateDuration/speedup);
+            if (updateDuration > realDuration * 3) {
+                updateDuration = 200;
+                Console.WriteLine("reset  duration");
+            }
+            Clients.Client(Context.ConnectionId).SendAsync("updateAircraft", updateDuration/speedup, json);
+            float durationScale = getDurationScale(verifiedList, lastAircraftList);
+            lastAircraftList = (JArray)verifiedList.DeepClone();
+            changeInterval(updateDuration/speedup);
         }
 
+        private static JObject jarr2jobj(JArray a) {
+            JObject objA = new JObject();
+            foreach (JObject x in a) {
+                JObject loc = new JObject();
+                loc["Lat"] = x["Lat"];
+                loc["Long"] = x["Long"];
+                if (hasKey("PosTime", x)) loc["Postime"] = x["PosTime"];
+                objA[x["Icao"]] = loc;
+            }
+            return objA;
+        }
+        private static float getDurationScale(JArray a, JArray b) {
+           JObject objA = jarr2jobj(a);
+           JObject objB = jarr2jobj(b);
+           float 
+            foreach (var x in objA) {
+                if (hasKey(x.Key, objB)) {
+                    float lat1 = (float)x.Value["Lat"];
+                    float long1 = (float)x.Value["Long"];
+                    float postime1 = (float)x.Value["PosTime"];
+                    float lat2 = (float)objB["Lat"];
+                    float long2 = (float)objB["Long"];
+                    float postime2 = (float)objB["PosTime"];
+                    dis += 
+                }
+            }
+        }
         public void Echo(string name, 
             float North_, float East_, float South_, float West_)
         {
@@ -184,14 +195,17 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
 
         }
 
+        private static bool hasKey(string key, JObject obj) {
+                    var msgProperty = obj.Property(key);
+                    if (msgProperty == null) return false;
+                    return true;
+
+        }
         private JArray PreprocessAircraftList(JArray aircraftList, float North, float East, float South, float West) 
         {
             JArray arr = new JArray();
             foreach (var aircraft in aircraftList)
             {
-                // Console.WriteLine("Edge North {0} East {1}  South {2} West {3}", North, East, South, West);
-                // Console.WriteLine("aircraft ({0}, {1})", (float)aircraft["Lat"], (float)aircraft["Long"]);
-                
                 PointF loc = new PointF((float)aircraft["Lat"], (float)aircraft["Long"]);
 
                 // if (IsInScreen(loc, North, East, South, West)) 
@@ -199,12 +213,28 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
                 {
                     // var msgProperty = filteredKeys.Property((string)aircraft["Icao"]);
                     // if (msgProperty != null) {
-                    //     arr.Add(aircraft);
-                    // }
+                    if (hasKey((string)aircraft["Icao"], filteredKeys)) {
+                        arr.Add(aircraft);
+                    }
                     arr.Add(aircraft);
                 }
             }
             return arr;
+        }
+
+        private static double deg2rad(double deg) {
+            return deg * (Math.PI) / 180.0;
+        }
+        private static double dis(double lat1, double lat2, double long1, double long2) {
+            double R = 6371;
+            double dLat = deg2rad(lat2-lat1);
+            double dLon = deg2rad(long2-long1);
+            double a = Math.Sin(dLat/2) * Math.Sin(dLat/2) +
+            Math.Cos(deg2rad(lat1)) * Math.Cos(deg2rad(lat2)) * 
+            Math.Sin(dLon/2.0) * Math.Sin(dLon/2.0);
+            double c = 2.0 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1.0-a));
+            double d = R * c;
+            return d;
         }
     }
 }
