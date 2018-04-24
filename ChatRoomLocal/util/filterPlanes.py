@@ -11,11 +11,11 @@ def load_obj(name ):
 filteredPlane = {}
 
 # filter parameter
-minDataCnt = 5 * 60
-minTotalTime = 3 * 60 * 60
-minSequenceDuration = 30 * 60
+minDataCnt = 1
+minTotalTime =  30 * 60 * 1000
+minSequenceDuration = 10 * 60 * 1000
 minSequenceCnt = 1
-maxSpeed = 250 * 2 / 1000
+maxSpeed = 900 * 1000 / (60*60*1000) * 50
 
 def deg2rad(deg):
     return deg * math.pi / 180.0

@@ -2,22 +2,25 @@ import os
 import glob
 import json
 
+fromMyData = True
+
 curDirPath = os.path.dirname(__file__)
 data_folder_path = os.path.join(curDirPath, '..', 'data', '*.json');
-# data_folder_path = 'D:/tmp/json/*.json';
 print(data_folder_path)
 
 data_files = glob.glob(data_folder_path)
-for path in data_files: print(path)
-# data_files.sort()
-# data_files = []
-# for i in range(443):
-# 	data_files.append('D:/tmp/json/aircraft-{}.json'.format(i));
+
+if fromMyData:
+	data_files = []
+	for i in range(1,443):
+		data_files.append('json/aircraft-{}.json'.format(i));
 # print(data_files)
 
 plane_list = ['405A48', '400A25', '40095D', '010160', '3C6643','40097E', '4CA215', '40701B', '3991E5', '406531'];
 
 l = len(data_files)
+l = 50
+speedup = 4;
 record = [{}] * l
 
 def plane_filter(ac, plane_list, city):
@@ -31,10 +34,11 @@ def plane_filter(ac, plane_list, city):
 # print(record)
 print('data_files len', len(data_files))
 
-for i in range(len(data_files)):
+
+for i in range(l):
 	if i >= l:
 		break
-	path = data_files[i]
+	path = data_files[i*speedup]
 	print(path)
 	contents = None
 	with open(path, 'r', encoding='UTF-8') as f:
@@ -46,8 +50,7 @@ for i in range(len(data_files)):
 	
 	cnt = 0;
 	for ac in acList:
-		if plane_filter(ac, plane_list, 'New York'):
-		# if plane_filter(ac, plane_list, 'New York') or plane_filter(ac, plane_list, 'Shanghai') or plane_filter(ac, plane_list, 'London'):
+		if plane_filter(ac, plane_list, 'London'):
 			tmp.append({ 
 				'Icao': ac.get('Icao', '000000'),
 				'Lat' : ac.get('Lat', 0.),
@@ -55,7 +58,7 @@ for i in range(len(data_files)):
 				'Gnd': ac.get('Gnd', False),
 				'From': ac.get('From', ''),
 				'To': ac.get('To', ''),
-				'PosTime': ac.get('PosTime', []),
+				'PosTime': ac.get('PosTime', -1),
 				'Cos': ac.get('Cos', [])
 			})
 	record[i] = tmp
@@ -63,4 +66,4 @@ for i in range(len(data_files)):
 				
 
 with open(os.path.join(curDirPath, 'london-aircraft.json'), 'w') as f:
-	f.write(json.dumps(record))	
+	json.dump(record, f)

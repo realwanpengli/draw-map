@@ -61,8 +61,9 @@ function onConnected(connection) {
 }
 
 function bindConnectionMessage(connection) {
-    var updateAircraftsCallback = function(name, aircrafts) {
-        // console.log('signalR', name);
+    var updateAircraftsCallback = function(duration, aircrafts) {
+        console.log('updateDuration', updateDuration);
+        updateDuration = duration;
         aircraftJsonStrCache = aircrafts;
         if (!isInit) {
             initAircraft(aircrafts);
@@ -79,7 +80,7 @@ function bindConnectionMessage(connection) {
         var south = currentBound.getSouth();
         var west = currentBound.getWest();
         // console.log('updateBoundRequestCallBack', north);
-        // console.log('ind = ', ind)
+        console.log('ind = ', ind)
         connection.send('updateBound', ind, north, east, south, west);
     }
 

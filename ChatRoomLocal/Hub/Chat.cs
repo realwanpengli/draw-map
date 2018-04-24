@@ -31,6 +31,7 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
 
         private static int updateDuration;
         private static int xxx;
+        private static long curTimestamp;
         public void StartUpdate(int xxx, 
                                 float North, float East, float South, float West)
         {
@@ -38,18 +39,19 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
 
             ind = 0;
             xxx = 567;
-            updateDuration = 5 * 1000;
+            updateDuration = 1 * 1000;
+            curTimestamp = -1;
 
             Console.WriteLine(updateDuration);
             string data = ProcessFile(".\\util\\london-aircraft.json"); 
             jarray = JArray.Parse(data);
 
             string dataFilteredKeys = ProcessFile(".\\util\\filtered-plane.json"); 
-            Console.WriteLine(dataFilteredKeys);
+            // Console.WriteLine(dataFilteredKeys);
             filteredKeys = JObject.Parse(dataFilteredKeys);
 
             Console.WriteLine("update duration {0}", updateDuration);
-            // Clients.All.SendAsync("updateBoundRequest", -1);
+            // Clients.All.SendAsync("updateBoundRequest", ind++);
             SetTimer(updateDuration);
         }
 
@@ -64,24 +66,73 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
                     ind = 0;
                 }
             };
-            aTimer.AutoReset = true;
+            aTimer.AutoReset = false;
             aTimer.Enabled = true;
         }
 
+        private void changeInterval(int interval) {
+            aTimer.Interval = interval;
+            aTimer.Start();
+        }
+
+        // public void SetTimer(int interval)
+        // {
+        //     while(true) {
+        //         Console.WriteLine("update bound request");
+        //         Clients.All.SendAsync("updateBoundRequest", ind++);
+        //         if (ind >= jarray.Count) {
+        //             ind = 0;
+
+        //         }
+        //         Thread.Sleep(updateDuration);
+                
+        //     };
+        // }
 
         public void UpdateBound(int Ind, float North, float East, float South, float West) {
             
             // Console.WriteLine("UpdateBound jarray = ");
             // Console.WriteLine(jarray);
             Console.WriteLine(Ind);
-
             // todo: send different client different data according to their bound
-            
-            var verifiedList = PreprocessAircraftList((JArray)jarray[Ind], North, East, South, West);
-            var json = verifiedList.ToString();
+            while (true) {
+                var verifiedList = PreprocessAircraftList((JArray)jarray[Ind], North, East, South, West);
+                var json = verifiedList.ToString();
+                int indPro = 0;
+                while (true) {
+                    if ((long)(((JArray)verifiedList)[indPro]["PosTime"]) > -1) {
+                        updateDuration = (int)(((long)(((JArray)verifiedList)[indPro]["PosTime"]) - (long)curTimestamp));
+                        updateDuration /= 4;
+                        break;
+                    }
+                    indPro++;
+                    Console.WriteLine("indPro = {0}", indPro);
+                }
+                if (curTimestamp < 0) {
+                    curTimestamp = (long)((((JArray)verifiedList))[indPro]["PosTime"]);
+                    Ind++;
+                    continue;
+                }
+                curTimestamp = (long)((((JArray)verifiedList))[indPro]["PosTime"]);
+                Console.WriteLine("XXX duration {0}", updateDuration);
+                Ind++;
+                verifiedList = PreprocessAircraftList((JArray)jarray[Ind], North, East, South, West);
+                json = verifiedList.ToString();
 
-            // send to server
-            Clients.Client(Context.ConnectionId).SendAsync("updateAircraft", -1, json);
+                Console.WriteLine("Ind = {0}", Ind);
+                
+                if (updateDuration < 6 * 1000) {
+                    ind++;
+                    continue;
+                }
+                // send to server
+                Clients.Client(Context.ConnectionId).SendAsync("updateAircraft", updateDuration, json);
+                break;
+            };
+            Console.WriteLine("timer duration {0}", updateDuration);
+            Console.WriteLine("cur timestamp {0}", curTimestamp);
+            if (updateDuration > 50 * 1000) updateDuration = 200;
+            changeInterval(updateDuration);
         }
 
         public void Echo(string name, 
@@ -146,11 +197,11 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
                 // if (IsInScreen(loc, North, East, South, West)) 
                 if (IsLatValid(loc.X) && IsLongValid(loc.Y)) 
                 {
-                    var msgProperty = filteredKeys.Property((string)aircraft["Icao"]);
-                    // Console.WriteLine(msgProperty);
-                    if (msgProperty != null) {
-                        arr.Add(aircraft);
-                    }
+                    // var msgProperty = filteredKeys.Property((string)aircraft["Icao"]);
+                    // if (msgProperty != null) {
+                    //     arr.Add(aircraft);
+                    // }
+                    arr.Add(aircraft);
                 }
             }
             return arr;

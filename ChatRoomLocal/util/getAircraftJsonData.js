@@ -28,6 +28,6 @@ var saveJsonFun = function() {
 }
 
 
-setInterval(saveJsonFun, 30000);
+setInterval(saveJsonFun, 10*1000);
 
 

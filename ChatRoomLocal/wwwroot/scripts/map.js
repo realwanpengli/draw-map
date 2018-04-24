@@ -12,10 +12,10 @@ function GetMap() {
 
 function loadMapScenario() {
     map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
-        center: cityLocation['NewYork'],
+        center: cityLocation['London'],
         mapTypeId: Microsoft.Maps.MapTypeId.road,
         liteMode: true,
-        zoom: 6
+        zoom: 10
     });
     return map;
 }
@@ -99,6 +99,9 @@ function rotatePushpin(pin, dest, url, angle) {
 
 
 function _interpolatePosition(src, dest, curTimestamp, startTimeStamp, duration) {
+    if (duration == 0) {
+        return dest;
+    }
     var latVec = -src.latitude + dest.latitude;
     var longVec = -src.longitude + dest.longitude;
 
@@ -109,35 +112,74 @@ function _interpolatePosition(src, dest, curTimestamp, startTimeStamp, duration)
     return new Microsoft.Maps.Location(curLat, curLong);
 }
 
+// function movePinToLocation(dest, pin, duration, id) {
+//     var src = pin.getLocation();
+//     var latVec = -src.latitude + dest.latitude;
+//     var longVec = -src.longitude + dest.longitude;
+    
+//     // console.log(id, 'distance', Math.sqrt(latVec * latVec + longVec * longVec));
+//     rotatePushpin(pin, dest, getIconUrl(id), compAngle(src, dest));
+
+//     var start = null;
+//     var end = null;
+//     // var i = 0;
+//     // console.log(pin.getLocation().latitude, pin.getLocation().longitude, dest.latitude, dest.longitude);
+//     var h;
+//     var step = function (timestamp) {
+//         if (!start) {
+//             start = timestamp;
+//             end = start + duration;
+//         }
+//         var newLoc = _interpolatePosition(src, dest, timestamp, start, duration);
+//         if (timestamp < end) {
+//             pin.setLocation(newLoc);
+//             window.requestAnimationFrame(step);
+//         } else {
+//             pin.setLocation(dest);
+//             // clearInterval(h);
+//         }
+
+        
+//     }
+
+//     // h = setInterval(step, 30);
+    
+//     window.requestAnimationFrame(step);
+// }
+
 function movePinToLocation(dest, pin, duration, id) {
     var src = pin.getLocation();
     var latVec = -src.latitude + dest.latitude;
     var longVec = -src.longitude + dest.longitude;
     
     // console.log(id, 'distance', Math.sqrt(latVec * latVec + longVec * longVec));
-
     rotatePushpin(pin, dest, getIconUrl(id), compAngle(src, dest));
 
     var start = null;
     var end = null;
     // var i = 0;
-    var step = function (timestamp) {
-        if (!start) {
-            start = timestamp;
-            end = start + duration;
-        }    
+    // console.log(pin.getLocation().latitude, pin.getLocation().longitude, dest.latitude, dest.longitude);
+    var h;
+    var timestamp = performance.now();
+    start = timestamp;
+    end = start + duration;
+    var step = function () {
+        var timestamp = performance.now();
         var newLoc = _interpolatePosition(src, dest, timestamp, start, duration);
-        console.log('newloc ', newLoc);
+        // console.log('loc', newLoc);
         if (timestamp < end) {
             pin.setLocation(newLoc);
-            window.requestAnimationFrame(step);
         } else {
             pin.setLocation(dest);
+            clearInterval(h);
         }
-    }
-    window.requestAnimationFrame(step);
-}
 
+        
+    }
+
+    h = setInterval(step, 60);
+    
+}
 
 
 
@@ -153,7 +195,6 @@ function getIconUrl(id) {
 
 function addPins(aircraftDict, aircraftList, map) {
     var startTime, endTime;
-    console.log('add pins');
     startTime = new Date();
     var l = aircraftList.length; 
     console.log('aircraft list len = ', aircraftList.length);
@@ -161,7 +202,8 @@ function addPins(aircraftDict, aircraftList, map) {
     var pins = new Microsoft.Maps.EntityCollection();
     for (var i = 0; i < l; i++) {
         var aircraft = aircraftList[i];
-        
+        var key = aircraft['Icao'];
+        if (key in aircraftDict) continue;
         var location = new Microsoft.Maps.Location(aircraft.Lat, aircraft.Long);
         var aircraftImage = getIconUrl(aircraft.Icao);
         var pin = new Microsoft.Maps.Pushpin(location, {
@@ -176,7 +218,7 @@ function addPins(aircraftDict, aircraftList, map) {
     map.entities.push(pins);
 
     endTime = new Date();
-    console.log('addpins time', (endTime - startTime)/1000);
+    // console.log('addpins time', (endTime - startTime)/1000);
 }
 
 function _initAircraft(aircraftList, aircraftDict, map) {
@@ -209,7 +251,26 @@ function _addVar(array, data) {
     return newArr;
 }
 
+function clearPlanes(aircraftDict, newAircraftList, map) {
+    // clear on gnd planes and get cur keys
+    var curKeys = {};
+    var l = newAircraftList.length;
+    for (var i = 0; i < l; i++) {
+        var key = newAircraftList[i]['Icao'];
+        curKeys[key] = 1;
+        if (newAircraftList[i]['Gnd'] == true && key in aircraftDict) {
+            map.entities.remove(aircraftDict[key]);
+            delete aircraftDict[key];
+        }
+    }
+    // for (key in aircraftDict) {
+    //     if (key in curKeys == false) {
+    //         map.entities.remove(aircraftDict[key]);
+    //         delete aircraftDict[key];
+    //     }
+    // }
 
+}
 
 function _updateAircraft(newAircraftJson) {
     // console.log('aircraft json len', newAircraftJson.length);
@@ -223,23 +284,21 @@ function _updateAircraft(newAircraftJson) {
 
     var pins = new Microsoft.Maps.EntityCollection();
     var l = newAircraftList.length;
-
+    // console.log('l = ', newAircraftList.length);
+    
+    addPins(aircraftDict, newAircraftList, map);
+    clearPlanes(aircraftDict, newAircraftList, map);
+    console.log('updateDuration', updateDuration);
     for (var i = 0; i < l; i++) {
-        // debug
-        if (newAircraftList[i]['Icao'] != 'A418B2') {continue;}
-        
-        if (newAircraftList[i]['Icao'] == 'A418B2') {
-            console.log('A418B2', newAircraftList[i]['Lat'], newAircraftList[i]['Long']);
-        }
-
-        var newLat = newAircraftList[i].Lat;
-        var newLong = newAircraftList[i].Long;
-
-        var key = newAircraftList[i].Icao;
-        var pin = aircraftDict[key];
-        var newLoc = new Microsoft.Maps.Location(newLat, newLong);
+        var key = newAircraftList[i]['Icao'];
         if (aircraftDict[key] != undefined) {
-            movePinToLocation(newLoc, pin, updateDuration-100, key);
+            var newLat = newAircraftList[i].Lat;
+            var newLong = newAircraftList[i].Long;
+            var key = newAircraftList[i].Icao;
+            var pin = aircraftDict[key];
+            var newLoc = new Microsoft.Maps.Location(newLat, newLong);
+            if (key == "406B20") console.log(key, newLat, newLong);
+            movePinToLocation(newLoc, pin, updateDuration, key);
         }
 
     }
