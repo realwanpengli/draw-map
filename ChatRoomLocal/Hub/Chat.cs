@@ -26,37 +26,46 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
         private static int ind;
         private static JArray jarray;
         private static JObject filteredKeys;
-        private static int updateDuration;
-        private static int xxx;
+        private static long updateDuration;
+        // private static int xxx;
         private static long curTimestamp;
-        private static int speedup;
-        private static int realDuration;
+        private static long speedup;
+        private static long realDuration;
         private static JArray lastAircraftList;
+
+        private static float north;
+        private static float east;
+        private static float south;
+        private static float west;
         public void StartUpdate(int xxx, 
                                 float North, float East, float South, float West)
         {
-            Clients.All.SendAsync("echo", -1);
+            // Clients.All.SendAsync("echo", -1);
+            north = North;
+            east = East;
+            south = South;
+            west = West;
 
             ind = 0;
             xxx = 567;
             updateDuration = 1 * 1000;
             curTimestamp = -1;
-            speedup = 6;
-            realDuration = 3 * 10 * 1000;
+            speedup = 4;
+            realDuration =  15 * 1000;
             lastAircraftList = null;
 
             Console.WriteLine(updateDuration);
-            string data = ProcessFile(".\\util\\london-aircraft.json"); 
+            string data = ProcessFile(".\\util\\tcp-aircraft-small.json"); 
             jarray = JArray.Parse(data);
 
-            string dataFilteredKeys = ProcessFile(".\\util\\stat\\filtered-plane.json"); 
+            string dataFilteredKeys = ProcessFile(".\\util\\stat_tcp_1\\filtered-plane.json"); 
             filteredKeys = JObject.Parse(dataFilteredKeys);
-
+            Console.WriteLine("keys cnt= {0}", filteredKeys.Count);
             Console.WriteLine("update duration {0}", updateDuration);
             SetTimer(updateDuration);
         }
 
-        private void SetTimer(int interval)
+        private void SetTimer(long interval)
         {
             aTimer = new System.Timers.Timer(interval);
             aTimer.Elapsed += (sender, e) => {
@@ -69,11 +78,29 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             aTimer.Enabled = true;
         }
 
-        private void changeInterval(int interval) {
+        private void changeInterval(long interval) {
             aTimer.Interval = interval;
             aTimer.Start();
         }
 
+        private long getPosTime(JArray arr) {
+            JObject o = new JObject();
+            foreach (var x in arr) {
+                o[x["PosTime"].ToString()] = (long)0;
+            }
+            foreach (var x in arr) {
+                o[x["PosTime"].ToString()] = (long)o[x["PosTime"].ToString()] + (long)1;
+            }
+            long postime = -1;
+            long maxCnt = 0;
+            foreach (var x in o) {
+                if (x.Key != ((long)-1).ToString() && maxCnt < (int)x.Value) {
+                    maxCnt = (long)x.Value;
+                    postime = Convert.ToInt64(x.Key);
+                }
+            }
+            return postime;
+        }
         public void UpdateBound(int Ind, float North, float East, float South, float West) {
             
             Console.WriteLine(Ind);
@@ -81,22 +108,23 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             string json;
 
             while (true) {
+                
                 verifiedList = PreprocessAircraftList((JArray)jarray[Ind], North, East, South, West);
                 json = verifiedList.ToString();
                 int indPro = 0;
+                if (curTimestamp < 0) {
+                    curTimestamp = (long)((((JArray)verifiedList))[indPro]["PosTime"]) - realDuration / speedup;
+                }
                 while (true) {
-                    if ((long)(((JArray)verifiedList)[indPro]["PosTime"]) > -1) {
-                        updateDuration = (int)(((long)(((JArray)verifiedList)[indPro]["PosTime"]) - (long)curTimestamp));
+                    long postime = getPosTime(verifiedList);
+                    if (postime > -1) {
+                        updateDuration = (postime - curTimestamp);
                         break;
                     }
                     indPro++;
                 }
-                if (curTimestamp < 0) {
-                    curTimestamp = (long)((((JArray)verifiedList))[indPro]["PosTime"]);
-                    Ind++;
-                    continue;
-                }
-                curTimestamp = (long)((((JArray)verifiedList))[indPro]["PosTime"]);
+                
+                
                 Ind++;
                 verifiedList = PreprocessAircraftList((JArray)jarray[Ind], North, East, South, West);
                 json = verifiedList.ToString();
@@ -104,14 +132,18 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
                 
                 if ((float)updateDuration < (float)realDuration * 0.7) {
                     ind++;
+                    Console.WriteLine("update duration: {1}; Skip to {0}", ind, updateDuration);
                     continue;
                 }
+                curTimestamp = (long)((((JArray)verifiedList))[indPro]["PosTime"]);
+                
                 break;
             };
             Console.WriteLine("timer duration {0}", updateDuration/speedup);
             if (updateDuration > realDuration * 3) {
-                updateDuration = 200;
-                Console.WriteLine("reset  duration");
+                // updateDuration = 200;
+                Console.WriteLine("update suddenlly slow");
+                // Console.WriteLine("reset  duration");
             }
             Clients.Client(Context.ConnectionId).SendAsync("updateAircraft", updateDuration/speedup, json);
             // float durationScale = getDurationScale(verifiedList, lastAircraftList);
@@ -180,12 +212,18 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
         {
             // is location valid
             if (!IsLatValid(pt.X) || !IsLongValid(pt.Y)) {
-                Console.WriteLine("location invalid");
+                // Console.WriteLine("location invalid");
                 return false;
             }
 
             float lat = pt.X;
             float long_ = pt.Y;
+            float eps = 0.002F;
+            
+            North += eps;
+            East += eps;
+            South -= eps;
+            West -= eps;
 
             if (West < East)
                 return long_ < East && long_ > West && lat < North && lat > South;
@@ -208,14 +246,15 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             {
                 PointF loc = new PointF((float)aircraft["Lat"], (float)aircraft["Long"]);
 
-                // if (IsInScreen(loc, North, East, South, West)) 
-                if (IsLatValid(loc.X) && IsLongValid(loc.Y)) 
+                if (IsInScreen(loc, north, east, south, west) && (bool)aircraft["Gnd"] == false) 
+                // if (IsLatValid(loc.X) && IsLongValid(loc.Y)) 
                 {
                     // var msgProperty = filteredKeys.Property((string)aircraft["Icao"]);
-                    // if (msgProperty != null) {
-                    if (hasKey((string)aircraft["Icao"], filteredKeys)) {
-                        arr.Add(aircraft);
-                    }
+                    // if (hasKey((string)aircraft["Icao"], filteredKeys)) {
+                    //     arr.Add(aircraft);
+                    // }
+
+                    /// just put into list ///
                     arr.Add(aircraft);
                 }
             }

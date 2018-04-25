@@ -20,6 +20,10 @@ def load_json(path):
         d = json.load(json_data)
         return d
 
+def save_json(path, data):
+    with open(path, 'w') as f:
+        json.dump(data, f)
+
 def getAcList(path):
 	contents = None
 	j = load_json(path)
@@ -40,3 +44,15 @@ def dis(lat1, lat2, long1, long2):
     c = 2. * math.atan2(math.sqrt(a), math.sqrt(1.-a))
     d = R * c
     return d * 1000
+
+def hour2ms(x):
+    return x * 60 * 60 * 1000
+
+def min2ms(x):
+    return x * 60 * 1000
+
+def s2ms(x):
+    return x * 1000
+
+def km2m(x):
+    return x * 1000

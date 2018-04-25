@@ -18,6 +18,8 @@ function loadMapScenario() {
         liteMode: true,
         zoom: 6
     });
+    // console.log("xxxbound", map.getB.getNorth(), map.getEast(), map.getSouth(), map.getWest());
+    
     return map;
 }
 
@@ -264,12 +266,23 @@ function clearPlanes(aircraftDict, newAircraftList, map) {
             delete aircraftDict[key];
         }
     }
-    // for (key in aircraftDict) {
-    //     if (key in curKeys == false) {
-    //         map.entities.remove(aircraftDict[key]);
-    //         delete aircraftDict[key];
-    //     }
-    // }
+
+    // clear planes not in list any more
+    for (key in aircraftDict) {
+        if (key in curKeys == false) {
+            map.entities.remove(aircraftDict[key]);
+            delete aircraftDict[key];
+        }
+    }
+
+    // clear out of screen planes
+    for (key in aircraftDict) {
+        var pin = aircraftDict[key];
+        if (!map.getBounds().contains(pin.getLocation())) {
+            map.entities.remove(pin);
+            delete aircraftDict[key];
+        }
+    }
 
 }
 

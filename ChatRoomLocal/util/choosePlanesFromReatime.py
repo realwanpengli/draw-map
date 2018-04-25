@@ -21,8 +21,8 @@ if fromMyData:
 plane_list = ['405A48', '400A25', '40095D', '010160', '3C6643','40097E', '4CA215', '40701B', '3991E5', '406531'];
 
 l = 300
-offset = 3
-speedup = 3
+offset = 0
+speedup = 1
 record = [{}] * l
 
 def plane_filter(ac, plane_list, city):
@@ -48,7 +48,7 @@ for i in range(len(data_files)):
 	acList = j['acList']
 	tmp = []
 
-	
+	# postime = path.split()
 	cnt = 0;
 	for ac in acList:
 		if True or plane_filter(ac, plane_list, 'NewYork'):

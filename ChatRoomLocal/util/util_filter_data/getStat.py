@@ -53,6 +53,9 @@ for i, path in enumerate(data_files):
 	acList = util.getAcList(path)
 	for ac in acList:
 		key = ac['Icao']
+		if 'Lat' not in ac or 'Long' not in ac: continue
+		if conf["source"] == "TCP": ac["PosTime"] = int(path.split('\\')[-1].split('.')[0])
+		# print(ac)
 		getPlaneStat(ac, stat)
 	updateStat(stat)
 	if i and i % 100 == 0: print(i, " files processed.")  
