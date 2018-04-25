@@ -27,17 +27,23 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
         {
             services.AddMvc();
             services.AddSingleton(typeof(IConfiguration), Configuration);
-            services.AddSignalR();
+            // services.AddSignalR();
+            services.AddAzureSignalR();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             app.UseMvc();
             app.UseFileServer();
-            app.UseSignalR(routes =>
-                { 
-                    routes.MapHub<Chat>("/chat");
-                });
+            // app.UseSignalR(routes =>
+            //     { 
+            //         routes.MapHub<Chat>("/chat");
+            //     });
+            app.UseAzureSignalR(Configuration[Constants.AzureSignalRConnectionStringKey],
+            builder => 
+            { 
+                builder.UseHub<Chat>(); 
+            });
         }
     }
 }

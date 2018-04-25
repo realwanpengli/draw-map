@@ -4,7 +4,11 @@ function startConnection(url, configureConnection) {
 
         console.log(`Starting connection using ${signalR.TransportType[transport]} transport`);
 
-        var connection = new signalR.HubConnection(url, { transport: transport });
+        var connection = new signalR.HubConnection(url, { 
+            transport: transport,
+            uid: username,
+            accessTokenFactory: () => accessToken
+        });
 
         if (configureConnection && typeof configureConnection === 'function') {
 
@@ -93,4 +97,25 @@ function bindConnectionMessage(connection) {
     connection.on('echo', echoCallBack);
     connection.on('updateBoundRequest', updateBoundRequestCallBack);
     connection.onclose(onConnectionError);
+}
+
+function getAccessToken(url) {
+    return new Promise((resolve, reject) => {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.send();
+        xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve(JSON.parse(xhr.response || xhr.responseText));
+            }
+            else {
+                reject(new Error(xhr.statusText));
+            }
+        };
+
+        xhr.onerror = () => {
+            reject(new Error(xhr.statusText));
+        }
+    });
 }

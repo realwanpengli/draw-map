@@ -4,22 +4,13 @@
         <title>Real-Time Aircraft Map</title>
         <style type='text/css'>body{margin:0;padding:0;overflow:hidden;font-family:'Segoe UI',Helvetica,Arial,Sans-Serif}</style>
         <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
-        <!-- <script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?key=AqJE7zYyzdIzgJoI-qIn_BBB2WHPGFQ_cWxfqi4T0mYf2UsReMxPnbUXHLyhoh-3&'></script> -->
-        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-
-        <!-- <script type="text/javascript" src="./js/AnimationModule.js"></script> -->
+        <script type='text/javascript' src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
         <script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=AqJE7zYyzdIzgJoI-qIn_BBB2WHPGFQ_cWxfqi4T0mYf2UsReMxPnbUXHLyhoh-3&'></script>
-
-        <!-- <script type="text/javascript" src="scripts/PanningOverlay.js"></script> -->
         <script type="text/javascript" src="scripts/signalr.js"></script>
         <script type="text/javascript" src="scripts/connect-signalr.js"></script>
         <script type='text/javascript' src='./scripts/loadData.js'></script>
         <script type='text/javascript' src='./scripts/map.js'></script>
-        <script type='text/javascript' src='./scripts/parallel.js'></script>
-        <script type='text/javascript' src='./scripts/test.js'></script>
-
         <script type='text/javascript'>
-
             // global var
             var map;
             var aircraftDict = {};
@@ -34,37 +25,28 @@
             var isInit = false;
             var path, cityLocation;
             var showTitle = true;
+            var username = 'albert';
+            var accessToken = '';
+
+            
 
             document.addEventListener('DOMContentLoaded', function () {
-                
-                // $("#showTitle").click(() => {
-                //     showTitle = !showTitle;
-                //     for( key in aircraftDict) {
-                //         aircraftDict[key].setOptions({
-                //             title: showTitle? JSON.parse(aircraftJsonStrCache)[i].Icao + city: null
-                //         });
-                //     }
-                // });                
-                
-                console.log("connecting signalR");
-
-                startConnection('/chat', bindConnectionMessage)
-                .then(onConnected)
-                .catch(onConnectionError);
-
-
+                console.log("Connecting signalR");
+                getAccessToken(`/api/auth/chat?uid=${username}`)
+                    .then(function(endpoint) {
+                        accessToken = endpoint.accessToken;
+                        return startConnection(endpoint.serviceUrl, bindConnectionMessage);
+                    })
+                    .then(onConnected)
+                    .catch(onConnectionError);
             });
-            
-            
         </script>
         
     </head>
     <body>
         <div id='printoutPanel'></div>
-        
         <div id='myMap' style='width: 100vw; height: 90vh;'></div>
         <div id='footer' style='width: 100vw; height: 10vh;'>
-            <!-- <button id='showTitle' >Show Tiltle</button> -->
             <button id='sendmessage'>Start</button>
             <button id='london' onclick="panMap('London')">London</button>
             <button id='shanghai' onclick="panMap('Shanghai')">Shanghai</button>

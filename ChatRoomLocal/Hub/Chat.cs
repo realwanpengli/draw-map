@@ -25,7 +25,7 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
         
         private static int ind;
         private static JArray jarray;
-        private static JObject filteredKeys;
+        // private static JObject filteredKeys;
         private static long updateDuration;
         // private static int xxx;
         private static long curTimestamp;
@@ -55,12 +55,12 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             lastAircraftList = null;
 
             Console.WriteLine(updateDuration);
-            string data = ProcessFile(".\\util\\tcp-aircraft-small.json"); 
+            string data = ProcessFile(".\\Data\\tcp-aircraft-small.json"); 
             jarray = JArray.Parse(data);
 
-            string dataFilteredKeys = ProcessFile(".\\util\\stat_tcp_1\\filtered-plane.json"); 
-            filteredKeys = JObject.Parse(dataFilteredKeys);
-            Console.WriteLine("keys cnt= {0}", filteredKeys.Count);
+            // string dataFilteredKeys = ProcessFile(".\\util\\stat_tcp_1\\filtered-plane.json"); 
+            // filteredKeys = JObject.Parse(dataFilteredKeys);
+            // Console.WriteLine("keys cnt= {0}", filteredKeys.Count);
             Console.WriteLine("update duration {0}", updateDuration);
             SetTimer(updateDuration);
         }
