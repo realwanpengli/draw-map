@@ -25,8 +25,6 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
                 .UseStartup<Startup>()
                 .Build()
                 .Run();
-
-
         }
     }
 }

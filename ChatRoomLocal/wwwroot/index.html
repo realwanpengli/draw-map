@@ -11,32 +11,42 @@
         <script type='text/javascript' src='./scripts/loadData.js'></script>
         <script type='text/javascript' src='./scripts/map.js'></script>
         <script type='text/javascript'>
+
+            // configuration
+            var debug = false;
+            var useLocalSignalR = false;
+
             // global var
             var map;
+            var pushpinLayer;
             var aircraftDict = {};
-            var tmpAircraftList = [];
             var updateDuration = 30 * 1000;
             var updateDelay = 30;
-            var debug = false;
-            var debugAircraft = '0';
-            var jsonStr = "";
             var start, end;
-            var aircraftJsonStrCache = null;
             var isInit = false;
-            var path, cityLocation;
-            var showTitle = true;
-            var username = 'albert';
+            var cityLocation;
+            var showTitle = debug ? true : false;
+            var username;
             var accessToken = '';
-
             
+            function generateRandomName() {
+                return Math.random().toString(36).substring(2, 10);
+            }
 
-            document.addEventListener('DOMContentLoaded', function () {
-                console.log("Connecting signalR");
-                getAccessToken(`/api/auth/chat?uid=${username}`)
+            $(()=>{
+                var username = generateRandomName();
+                console.log("Connecting signalR username", username);
+                
+                if (!useLocalSignalR)
+                    getAccessToken(`/api/auth/chat?uid=${username}`)
                     .then(function(endpoint) {
                         accessToken = endpoint.accessToken;
-                        return startConnection(endpoint.serviceUrl, bindConnectionMessage);
+                        return startConnection(endpoint.serviceUrl, configureConnection);
                     })
+                    .then(onConnected)
+                    .catch(onConnectionError);
+                else
+                    startConnection('/chat', configureConnection)
                     .then(onConnected)
                     .catch(onConnectionError);
             });
@@ -45,12 +55,9 @@
     </head>
     <body>
         <div id='printoutPanel'></div>
-        <div id='myMap' style='width: 100vw; height: 90vh;'></div>
-        <div id='footer' style='width: 100vw; height: 10vh;'>
-            <button id='sendmessage'>Start</button>
-            <button id='london' onclick="panMap('London')">London</button>
-            <button id='shanghai' onclick="panMap('Shanghai')">Shanghai</button>
-            <button id='newyork' onclick="panMap('NewYork')">NewYork</button>
-        </div>
+        <div id='myMap' style='width: 100vw; height: 100vh;'></div>
+        <!-- <div id='footer' style='width: 100vw; height: 10vh;'>
+            <button id='startUpdate'>Start</button>
+        </div> -->
     </body>
 </html>

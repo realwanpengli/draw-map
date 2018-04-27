@@ -18,8 +18,8 @@ function loadMapScenario() {
         liteMode: true,
         zoom: 6
     });
-    // console.log("xxxbound", map.getB.getNorth(), map.getEast(), map.getSouth(), map.getWest());
-    
+    pushpinLayer =  new Microsoft.Maps.Layer();
+    map.layers.insert(pushpinLayer);
     return map;
 }
 
@@ -44,18 +44,13 @@ function compAngle(src, dest) {
 
     }
 
-    // todo
-    if (false) {
-
-    } else {
-        var r = Math.sqrt(x*x + y*y);
-        var cos = x / r;
-        var angle = Math.acos(cos);
-        if (y < 0) {
-            angle = Math.PI * 2 - angle;
-        }
-        return angle;
+    var r = Math.sqrt(x*x + y*y);
+    var cos = x / r;
+    var angle = Math.acos(cos);
+    if (y < 0) {
+        angle = Math.PI * 2 - angle;
     }
+    return angle;
 }
 
 function rotatePushpin(pin, dest, url, angle) {
@@ -101,7 +96,7 @@ function rotatePushpin(pin, dest, url, angle) {
 
 
 
-function _interpolatePosition(src, dest, curTimestamp, startTimeStamp, duration) {
+function interpolatePosition(src, dest, curTimestamp, startTimeStamp, duration) {
     if (duration == 0) {
         return dest;
     }
@@ -115,72 +110,29 @@ function _interpolatePosition(src, dest, curTimestamp, startTimeStamp, duration)
     return new Microsoft.Maps.Location(curLat, curLong);
 }
 
-// function movePinToLocation(dest, pin, duration, id) {
-//     var src = pin.getLocation();
-//     var latVec = -src.latitude + dest.latitude;
-//     var longVec = -src.longitude + dest.longitude;
-    
-//     // console.log(id, 'distance', Math.sqrt(latVec * latVec + longVec * longVec));
-//     rotatePushpin(pin, dest, getIconUrl(id), compAngle(src, dest));
-
-//     var start = null;
-//     var end = null;
-//     // var i = 0;
-//     // console.log(pin.getLocation().latitude, pin.getLocation().longitude, dest.latitude, dest.longitude);
-//     var h;
-//     var step = function (timestamp) {
-//         if (!start) {
-//             start = timestamp;
-//             end = start + duration;
-//         }
-//         var newLoc = _interpolatePosition(src, dest, timestamp, start, duration);
-//         if (timestamp < end) {
-//             pin.setLocation(newLoc);
-//             window.requestAnimationFrame(step);
-//         } else {
-//             pin.setLocation(dest);
-//             // clearInterval(h);
-//         }
-
-        
-//     }
-
-//     // h = setInterval(step, 30);
-    
-//     window.requestAnimationFrame(step);
-// }
-
 function movePinToLocation(dest, pin, duration, id) {
     var src = pin.getLocation();
     var latVec = -src.latitude + dest.latitude;
     var longVec = -src.longitude + dest.longitude;
     
-    // console.log(id, 'distance', Math.sqrt(latVec * latVec + longVec * longVec));
     rotatePushpin(pin, dest, getIconUrl(id), compAngle(src, dest));
 
-    var start = null;
-    var end = null;
-    // var i = 0;
-    // console.log(pin.getLocation().latitude, pin.getLocation().longitude, dest.latitude, dest.longitude);
-    var h;
     var timestamp = performance.now();
-    start = timestamp;
-    end = start + duration;
+    var start = timestamp;
+    var end = start + duration;
+    var h;
     var step = function () {
         var timestamp = performance.now();
-        var newLoc = _interpolatePosition(src, dest, timestamp, start, duration);
-        // console.log('loc', newLoc);
+        var newLoc = interpolatePosition(src, dest, timestamp, start, duration);
         if (timestamp < end) {
             pin.setLocation(newLoc);
         } else {
             pin.setLocation(dest);
             clearInterval(h);
         }
-
-        
     }
 
-    h = setInterval(step, 60);
+    h = setInterval(step, updateDelay);
     
 }
 
@@ -188,20 +140,13 @@ function movePinToLocation(dest, pin, duration, id) {
 
 function getIconUrl(id) {
     var aircraftImage = 'images/airplane.svg';
-    if (id == debugAircraft) {
-        aircraftImage = 'images/plane.png';
-        return aircraftImage;
-    }
     return aircraftImage;
 
 }
 
-function addPins(aircraftDict, aircraftList, map) {
-    var startTime, endTime;
-    startTime = new Date();
+function addPins(aircraftList) {
     var l = aircraftList.length; 
-    console.log('aircraft list len = ', aircraftList.length);
-    tmpAircraftList = aircraftList.slice();
+    console.log(aircraftList.length + ' planes are flying.');
     var pins = new Microsoft.Maps.EntityCollection();
     for (var i = 0; i < l; i++) {
         var aircraft = aircraftList[i];
@@ -211,50 +156,29 @@ function addPins(aircraftDict, aircraftList, map) {
         var aircraftImage = getIconUrl(aircraft.Icao);
         var pin = new Microsoft.Maps.Pushpin(location, {
                 icon: aircraftImage,
-                title: showTitle? aircraft.Icao: null 
+                title: showTitle? aircraft.Icao: null,
+                visible: true
         });
-        // add aircraft to map and dict
         aircraftDict[aircraft.Icao] = pin;
-        pins.push(pin);
+        pushpinLayer.add(pin);
+        console.log(pin.getIcon());
     }
-
-    map.entities.push(pins);
-
-    endTime = new Date();
-    // console.log('addpins time', (endTime - startTime)/1000);
 }
-
-function _initAircraft(aircraftList, aircraftDict, map) {
-    var totalCnt = aircraftList.length;
-    console.log('totalCnt', totalCnt);
-    addPins(aircraftDict, aircraftList, map);
-
-}
-
 
 function initAircraft(aircraftJsonStr) {
     console.log('initAircraft');
-    var aircraftList = getAircraftList(JSON.parse(aircraftJsonStr));
-    _initAircraft(aircraftList, aircraftDict, map);
-
-    
+    var aircraftList = JSON.parse(aircraftJsonStr);
+    clearAllPlanes();
+    addPins(aircraftList);
+    pushpinLayer.setVisible(false);
 }
 
-function updateAircraft(aircraftJsonStr) {
-    _updateAircraft(JSON.parse(aircraftJsonStr));
+function clearAllPlanes() {
+    pushpinLayer.clear();
+    aircraftDict = {};
 }
 
-
-function _addVar(array, data) {
-    var newArr = [];
-    array.forEach(function(item) {
-        item.dict = data;
-        newArr.push(item);
-    });
-    return newArr;
-}
-
-function clearPlanes(aircraftDict, newAircraftList, map) {
+function clearPlanes(newAircraftList) {
     // clear on gnd planes and get cur keys
     var curKeys = {};
     var l = newAircraftList.length;
@@ -262,7 +186,7 @@ function clearPlanes(aircraftDict, newAircraftList, map) {
         var key = newAircraftList[i]['Icao'];
         curKeys[key] = 1;
         if (newAircraftList[i]['Gnd'] == true && key in aircraftDict) {
-            map.entities.remove(aircraftDict[key]);
+            pushpinLayer.remove(aircraftDict[key]);
             delete aircraftDict[key];
         }
     }
@@ -270,39 +194,14 @@ function clearPlanes(aircraftDict, newAircraftList, map) {
     // clear planes not in list any more
     for (key in aircraftDict) {
         if (key in curKeys == false) {
-            map.entities.remove(aircraftDict[key]);
+            pushpinLayer.remove(aircraftDict[key]);
             delete aircraftDict[key];
         }
     }
-
-    // clear out of screen planes
-    for (key in aircraftDict) {
-        var pin = aircraftDict[key];
-        if (!map.getBounds().contains(pin.getLocation())) {
-            map.entities.remove(pin);
-            delete aircraftDict[key];
-        }
-    }
-
 }
 
-function _updateAircraft(newAircraftJson) {
-    // console.log('aircraft json len', newAircraftJson.length);
-    var startTime, endTime;
-    startTime = new Date();
-
-    var newAircraftList;
-    newAircraftList =  getAircraftList(newAircraftJson);
-    tmpAircraftList = newAircraftList.slice();
-    console.log('update aircraft');
-
-    var pins = new Microsoft.Maps.EntityCollection();
+function movePins(newAircraftList) {
     var l = newAircraftList.length;
-    // console.log('l = ', newAircraftList.length);
-    
-    addPins(aircraftDict, newAircraftList, map);
-    clearPlanes(aircraftDict, newAircraftList, map);
-    console.log('updateDuration', updateDuration);
     for (var i = 0; i < l; i++) {
         var key = newAircraftList[i]['Icao'];
         if (aircraftDict[key] != undefined) {
@@ -311,23 +210,16 @@ function _updateAircraft(newAircraftJson) {
             var key = newAircraftList[i].Icao;
             var pin = aircraftDict[key];
             var newLoc = new Microsoft.Maps.Location(newLat, newLong);
-            if (key == "406B20") console.log(key, newLat, newLong);
             movePinToLocation(newLoc, pin, updateDuration, key);
         }
-
     }
-
-    endTime = new Date();
-    // console.log('updateAircraft time', (endTime - startTime)/1000);
 }
 
-
-
-
-function panMap(city) {
-    map.entities.clear();
-    map.setView({
-        center: cityLocation[city]
-    });
-    initAircraft(aircraftJsonStrCache);
+function updateAircraft(newAircraftJson) {
+    var newAircraftList = JSON.parse(newAircraftJson);
+    console.log('Update aircraft location.');
+    addPins(newAircraftList);
+    clearPlanes(newAircraftList);
+    pushpinLayer.setVisible(true);
+    movePins(newAircraftList);
 }

@@ -1,43 +1,28 @@
 function startConnection(url, configureConnection) {
 
     return function start(transport) {
-
         console.log(`Starting connection using ${signalR.TransportType[transport]} transport`);
-
-        var connection = new signalR.HubConnection(url, { 
+        var connection = !useLocalSignalR? new signalR.HubConnection(url, { 
             transport: transport,
             uid: username,
             accessTokenFactory: () => accessToken
-        });
+        }) : new signalR.HubConnection(url, { transport: transport });
+
 
         if (configureConnection && typeof configureConnection === 'function') {
-
             configureConnection(connection);
-
         }
 
-
-
         return connection.start()
-
             .then(function() {
-
                 return connection;
-
             })
-
             .catch(function(error) {
-
                 console.log(`Cannot start the connection use ${signalR.TransportType[transport]} transport. ${error.message}`);
-
                 if (transport !== signalR.TransportType.LongPolling) {
-
                     return start(transport + 1);
-
                 }
-
                 return Promise.reject(error);
-
             });
 
     }(signalR.TransportType.WebSockets);
@@ -52,50 +37,32 @@ function onConnectionError(error) {
 
 function onConnected(connection) {
     console.log('connection started');
-    $('#sendmessage').click(function (event) {
-        var info = "Start updpate aircrafts";
-        var currentBound = map.getBounds();
-        var north = currentBound.getNorth();
-        var east = currentBound.getEast();
-        var south = currentBound.getSouth();
-        var west = currentBound.getWest();
-        connection.send('startUpdate', updateDuration, north, east, south, west);
-    });
+    // $('#startUpdate').click(function (event) {
+    //     console.log("Start updpate aircrafts");
+    //     connection.send('startUpdate');
+    // });
     
 }
 
-function bindConnectionMessage(connection) {
-    var updateAircraftsCallback = function(duration, aircrafts) {
+function configureConnection(connection) {
+    var updateAircraftsCallback = function(duration, aircrafts, ind) {
         console.log('updateDuration', updateDuration);
         updateDuration = duration;
         aircraftJsonStrCache = aircrafts;
+        if (ind == 0) 
+            isInit = false;
         if (!isInit) {
             initAircraft(aircrafts);
             isInit = true;
-        } else {
+        } else 
             updateAircraft(aircrafts);
-        }
+        
     };
 
-    var updateBoundRequestCallBack = function(ind) {
-        var currentBound = map.getBounds();
-        var north = currentBound.getNorth();
-        var east = currentBound.getEast();
-        var south = currentBound.getSouth();
-        var west = currentBound.getWest();
-        // console.log('updateBoundRequestCallBack', north);
-        console.log('ind = ', ind)
-        connection.send('updateBound', ind, north, east, south, west);
-    }
-
-    var echoCallBack = function (arg) {
-        console.log('echo callback', arg);
-    };
     // Create a function that the hub can call to broadcast messages.
     connection.on('startUpdate', updateAircraftsCallback);
     connection.on('updateAircraft', updateAircraftsCallback);
-    connection.on('echo', echoCallBack);
-    connection.on('updateBoundRequest', updateBoundRequestCallBack);
+    // connection.on('updateBoundRequest', updateBoundRequestCallBack);
     connection.onclose(onConnectionError);
 }
 
