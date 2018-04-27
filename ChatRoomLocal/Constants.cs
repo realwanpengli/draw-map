@@ -8,7 +8,7 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
     {
   
         public const string AzureSignalRConnectionStringKey = "AzureSignalRConnectionString";
-        public const bool UseLoacalSignalR = false;
+        public const bool UseLoacalSignalR = true;
     }
 
 }

@@ -11,6 +11,11 @@ function GetMap() {
     loadMapScenario();
 }
 
+var offCtxes = [];
+var locations;
+var stage;
+var mapCanvas;
+
 function loadMapScenario() {
     map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
         center: cityLocation['Columbus'],
@@ -18,8 +23,85 @@ function loadMapScenario() {
         liteMode: true,
         zoom: 6
     });
+    
+    // Register and load Custom module
+    Microsoft.Maps.registerModule('CanvasOverlayModule', '/scripts/CanvasOverlayModule.js');
+    //Load the module.
+    Microsoft.Maps.loadModule('CanvasOverlayModule', function () {
+        // var locations = Microsoft.Maps.TestDataGenerator.getLocations(1, map.getBounds());
+        locations = Microsoft.Maps.TestDataGenerator.getLocations(10000, map.getBounds());
+
+        //Create a pushpin icon on an off screen canvas.
+        var offScreenCanvas = document.createElement('canvas');
+        offScreenCanvas.width = 14;
+        offScreenCanvas.height = 14;
+
+        //Draw a circle on the off screen canvas.
+        // var offCtx = offScreenCanvas.getContext('2d');
+        offCtx = offScreenCanvas.getContext('2d');
+        offCtx.fillStyle = 'blue';
+        offCtx.lineWidth = 2;
+        offCtx.strokeStyle = 'black';
+        offCtx.beginPath();
+        offCtx.arc(7, 7, 5, 0, 2 * Math.PI);
+        offCtx.closePath();
+        offCtx.fill();
+        offCtx.stroke();
+
+        //Implement the new custom overlay class.
+        var overlay = new CanvasOverlay(function (canvas) {
+            mapCanvas = canvas;
+
+            //Calculate pixel coordinates of locations.
+            var points = map.tryLocationToPixel(locations, Microsoft.Maps.PixelReference.control);
+            
+            //Get the context of the main canvas.
+            var ctx = canvas.getContext("2d");
+            
+            //Buffer map dimensions to account for radius of points.
+            var mapWidth = map.getWidth() + 7;
+            var mapHeight = map.getHeight() + 7;
+
+            //Draw the off screen canvas for each location.
+            for (var i = 0, len = points.length; i < len; i++) {
+                //Don't draw the point if it is not in view. This greatly improves performance when zoomed in.
+                // if (points[i].x >= -7 && points[i].y >= -7 && points[i].x <= mapWidth && points[i].y <= mapHeight) {
+                    ctx.drawImage(offScreenCanvas, points[i].x - 7, points[i].y - 7, 10, 10);
+                // }
+            }
+        });
+
+        
+
+        //Add a click event to the map and check to see if a circle is clicked.
+        Microsoft.Maps.Events.addHandler(map, 'click', function (e) {
+            setInterval(() => {
+                var src = map.tryLocationToPixel(locations, Microsoft.Maps.PixelReference.control);
+                var newlocs = locations.map((loc)=>{return new Microsoft.Maps.Location(loc.latitude+0.01, loc.longitude);});
+                var dest = map.tryLocationToPixel(newlocs, Microsoft.Maps.PixelReference.control);
+                locations = newlocs;
+                var ctx = mapCanvas.getContext("2d");
+                var mapWidth = map.getWidth() + 7;
+                var mapHeight = map.getHeight() + 7;
+
+                ctx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
+                //Draw the off screen canvas for each location.
+                for (var i = 0, len = dest.length; i < len; i++) {
+                    //Don't draw the point if it is not in view. This greatly improves performance when zoomed in.
+                    // if (dest[i].x >= -7 && dest[i].y >= -7 && dest[i].x <= mapWidth && dest[i].y <= mapHeight) {
+                        ctx.drawImage(offScreenCanvas, dest[i].x - 7, dest[i].y - 7, 10, 10);
+                    // }
+                }
+            }, 30);
+        });
+
+        //Add the custom overlay to the map.
+        map.layers.insert(overlay);
+    });
+    
     pushpinLayer =  new Microsoft.Maps.Layer();
     map.layers.insert(pushpinLayer);
+
     return map;
 }
 
