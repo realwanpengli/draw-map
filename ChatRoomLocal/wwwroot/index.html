@@ -4,38 +4,27 @@
         <title>Real-Time Aircraft Map</title>
         <style type='text/css'>body{margin:0;padding:0;overflow:hidden;font-family:'Segoe UI',Helvetica,Arial,Sans-Serif}</style>
         <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+        <script type='text/javascript' src='./scripts/global.js'></script>
         <script type='text/javascript' src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-        <script type='text/javascript' src="https://code.createjs.com/tweenjs-0.6.2.min.js"></script>
-        <script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
         <script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=AqJE7zYyzdIzgJoI-qIn_BBB2WHPGFQ_cWxfqi4T0mYf2UsReMxPnbUXHLyhoh-3&'></script>
         <script type="text/javascript" src="scripts/signalr.js"></script>
         <script type="text/javascript" src="scripts/connect-signalr.js"></script>
         <script type='text/javascript' src='./scripts/loadData.js'></script>
         <script type='text/javascript' src='./scripts/map.js'></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/2.6.4/svg.min.js"></script>
+        <script scr="./scripts/svg.resize.min.js"></script>
+        <!-- <script scr="./scripts/svg.import.min.js"></script> -->
         <script type='text/javascript'>
 
-            // configuration
-            var debug = true;
-            var useLocalSignalR = true;
-
-            // global var
-            var map;
-            var pushpinLayer;
-            var aircraftDict = {};
-            var updateDuration = 30 * 1000;
-            var updateDelay = 30;
-            var start, end;
-            var isInit = false;
-            var cityLocation;
-            var showTitle = debug ? true : false;
-            var username;
-            var accessToken = '';
             
+
             function generateRandomName() {
                 return Math.random().toString(36).substring(2, 10);
             }
 
             $(()=>{
+                // console.log("snap", snap);
+                
                 var username = generateRandomName();
                 console.log("Connecting signalR username", username);
                 
@@ -58,8 +47,7 @@
     <body>
         <div id='printoutPanel'></div>
         <div id='myMap' style='width: 100vw; height: 100vh;'></div>
-        <!-- <div id='footer' style='width: 100vw; height: 10vh;'>
-            <button id='startUpdate'>Start</button>
-        </div> -->
+        </div> 
+
     </body>
 </html>

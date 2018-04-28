@@ -37,25 +37,25 @@ function onConnectionError(error) {
 
 function onConnected(connection) {
     console.log('connection started');
-    // $('#startUpdate').click(function (event) {
-    //     console.log("Start updpate aircrafts");
-    //     connection.send('startUpdate');
-    // });
-    
 }
 
 function configureConnection(connection) {
-    var updateAircraftsCallback = function(duration, aircrafts, ind) {
+    var updateAircraftsCallback = function(duration, str, ind) {
+        var aircrafts = JSON.parse(str);
+        // if (isInit == false) {
+            aircraftsCache = aircrafts;
+        // }
         console.log('updateDuration', updateDuration);
         updateDuration = duration;
-        aircraftJsonStrCache = aircrafts;
         if (ind == 0) 
             isInit = false;
-        if (!isInit) {
-            initAircraft(aircrafts);
-            isInit = true;
-        } else 
-            updateAircraft(aircrafts);
+        updateAircraft(aircraftsCache);
+        isInit = true;
+        // if (!isInit) {
+        //     initAircraft(aircrafts);
+        //     isInit = true;
+        // } else 
+        //     updateAircraft(aircrafts);
         
     };
 

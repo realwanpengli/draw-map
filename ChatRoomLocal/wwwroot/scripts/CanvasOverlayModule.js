@@ -54,7 +54,8 @@ var CanvasOverlay = (function (_super) {
      */
     CanvasOverlay.prototype.onAdd = function () {
         //Create a canvas for rendering.
-        this._canvas = document.createElement('canvas');
+        this._canvas = document.createElement('div');
+        this._canvas.setAttribute('id','flightMapSvg')
         this._canvas.style.position = 'absolute';
         this._canvas.style.left = '0px';
         this._canvas.style.top = '0px';
@@ -73,31 +74,7 @@ var CanvasOverlay = (function (_super) {
         this._centerStart = map.getCenter();
         //Redraw the canvas.
         self._redraw();
-        //When the map moves, move the canvas accordingly. 
-        self._viewChangeEvent = Microsoft.Maps.Events.addHandler(map, 'viewchange', function (e) {
-            if (map.getMapTypeId() === Microsoft.Maps.MapTypeId.streetside) {
-                //Don't show the canvas if the map is in Streetside mode.
-                self._canvas.style.display = 'none';
-            }
-            else {
-                // //Re-drawing the canvas as it moves would be too slow. Instead, scale and translate canvas element.
-                // var zoomCurrent = map.getZoom();
-                // var centerCurrent = map.getCenter();
-                // //Calculate map scale based on zoom level difference.
-                // var scale = Math.pow(2, zoomCurrent - self._zoomStart);
-                // //Calculate the scaled dimensions of the canvas.
-                // var newWidth = map.getWidth() * scale;
-                // var newHeight = map.getHeight() * scale;
-                // //Calculate offset of canvas based on zoom and center offsets.
-                // var pixelPoints = map.tryLocationToPixel([self._centerStart, centerCurrent], Microsoft.Maps.PixelReference.control);
-                // var centerOffsetX = pixelPoints[1].x - pixelPoints[0].x;
-                // var centerOffsetY = pixelPoints[1].y - pixelPoints[0].y;
-                // var x = (-(newWidth - map.getWidth()) / 2) - centerOffsetX;
-                // var y = (-(newHeight - map.getHeight()) / 2) - centerOffsetY;
-                // //Update the canvas CSS position and dimensions.
-                // self._updatePosition(x, y, newWidth, newHeight);
-            }
-        });
+
         //When the map stops moving, render new data on the canvas.
         self._viewChangeEndEvent = Microsoft.Maps.Events.addHandler(map, 'viewchangeend', function (e) {
             self.updateCanvas();
@@ -107,6 +84,9 @@ var CanvasOverlay = (function (_super) {
             self.updateCanvas();
         });
     };
+
+    
+
     CanvasOverlay.prototype.updateCanvas = function () {
         var map = this.getMap();
         //Only render the canvas if it isn't in streetside mode.
@@ -160,6 +140,7 @@ var CanvasOverlay = (function (_super) {
         if (this._drawCallback) {
             this._drawCallback(this._canvas);
         }
+        console.log("CanvasOverlay redraw");
     };
     return CanvasOverlay;
 }(Microsoft.Maps.CustomOverlay));
