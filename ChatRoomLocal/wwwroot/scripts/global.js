@@ -8,7 +8,7 @@ var map;
 var pushpinLayer;
 var aircraftDict = {};
 var updateDuration = 30 * 1000;
-var updateDelay = 15;
+var updateDelay = 60;
 var start, end;
 var isInit = false;
 var cityLocation;

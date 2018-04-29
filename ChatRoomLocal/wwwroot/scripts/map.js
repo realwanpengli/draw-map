@@ -64,43 +64,35 @@ function compAngle(from, to) {
 }
 
 // rotate canvas c
-function rotatePushpin(url, rotationAngleRads) {
+function drawPlane(mapCtx, url, x, y, rotationAngleRads) {
+    // rotationAngleRads = rotationAngleRads * 180 / Math.PI;
     var c = document.createElement('canvas');    
     var context = c.getContext('2d');
     var img = new Image();
     img.onload = function () {
-    //    //Calculate rotated image size.
-    //    var dx = Math.abs(Math.cos(rotationAngleRads));
-    //    var dy = Math.abs(Math.sin(rotationAngleRads));
-    //    var width = Math.round(img.width * dx + img.height * dy);
-    //    var height = Math.round(img.width * dy + img.height * dx);
+       var dx = Math.abs(Math.cos(rotationAngleRads));
+       var dy = Math.abs(Math.sin(rotationAngleRads));
+       var width = Math.round(img.width * dx + img.height * dy);
+       var height = Math.round(img.width * dy + img.height * dx);
 
-    //     c.width = width;
-    //     c.height = height;
+        c.width = width;
+        c.height = height;
 
-    //     var context = c.getContext('2d');
+        context.translate(c.width / 2, c.height / 2);
+        context.rotate(rotationAngleRads);
+        context.translate(-img.width / 2, -img.height / 2)
 
-    //     //Move to the center of the canvas.
-    //     context.translate(c.width / 2, c.height / 2);
-
-    //     //Rotate the canvas to the specified angle in degrees.
-    //     context.rotate(rotationAngleRads);
-
-    //     context.translate(-img.width / 2, -img.height / 2)
-    //     //Draw the image, since the context is rotated, the image will be rotated also.
-    //     context.drawImage(img, 0,0);
-
-        c.width = 100;
-        c.height = 100;
         context.drawImage(img, 0,0);
-        
+
+        mapCtx.drawImage(c, x, y);  
+
     };
 
     //Allow cross domain image editting.
     img.crossOrigin = 'anonymous';
     img.src = url;
 
-    return c;
+    // return c;
 
 
     //Create a pushpin icon on an off screen canvas.
@@ -146,51 +138,27 @@ function getIconUrl(id) {
 
 function addPins(aircraftList) {
     var l = aircraftList.length; 
-    // var l = 1; 
     console.log(aircraftList.length + ' planes are flying.');
-    if (draw == null) {
-            draw = SVG('flightMapSvg').size(5000,5000);
-        }
+    
     for (var i = 0; i < l; i++) {
         var aircraft = aircraftList[i];
         var key = aircraft['Icao'];
-        var location = new Microsoft.Maps.Location(aircraft.Lat, aircraft.Long);
+        var to = new Microsoft.Maps.Location(aircraft.Lat, aircraft.Long);
         var aircraftImage = getIconUrl(aircraft.Icao);
         var angle = 0;
+        var from;
         if (key in aircraftDict) {
-            angle = compAngle(aircraftDict[key]['location'], location);
+            from = aircraftDict[key]['location'];
             continue;
+            // angle = compAngle(from, to);
         }
-        // console.log('location', location);
-        var point = map.tryLocationToPixel(location, Microsoft.Maps.PixelReference.control);
-        if (draw == null) {
-            draw = SVG('flightMapSvg').size(5000,5000);
-        }
-        if (draw) {
-            draw.svg(rawSvg.replace(/{ID}/, key));
-            // console.log("x",point.x, 'y', point.y);
-            // SVG.get(key).center(point.x, point.y).fill("#f00");
-            SVG.get(key).center(point.x, point.y).scale(0.1).rotate(90);
-        }
-
-        // update location
-        aircraftDict[key] = {
-            'location': location,
-            'title': key
-        };
+        // console.log('planeCanvas', planeCanvas);
+        // var pt = map.tryLocationToPixel(to, Microsoft.Maps.PixelReference.control);
+        // var planeCanvas = drawPlane(overlay._canvas.getContext("2d"), aircraftImage, pt.x, pt.y, angle);
+        aircraftDict[key] = {location: to};
+        
     }
     
-    if (SVG.get('000000') == null) {
-        var tmpPt = map.tryLocationToPixel(cityLocation['NewYork'], Microsoft.Maps.PixelReference.control);
-        map.entities.push(new Microsoft.Maps.Pushpin(cityLocation['NewYork']));
-        draw.svg(rawSvg.replace(/{ID}/, '000000'));
-        var one = SVG.get('000000');
-        one.center(tmpPt.x, tmpPt.y).scale(0.1).rotate(90);
-        // one.center(tmpPt.x, tmpPt.y).scale(0.1).rotate(30);
-        // one = one.scale(0.1);
-        // one = one.center(tmpPt.x, tmpPt.y).fill("#f06");
-        console.log("svg 000000");
-    }
 }
 
 function updateAircraft(aircraftList) {
@@ -202,15 +170,20 @@ function updateAircraft(aircraftList) {
         isInit = true;
     } else {
         clearAllPlanes();
+        // const context = overlay._canvas.getContext('2d');
+        // context.clearRect(0, 0, overlay._canvas.width, overlay._canvas.height);
         addPins(aircraftList);
         movePins(aircraftList);
     }
 }
 
 function clearAllPlanes() {
-    // aircraftDict = {};
-    // const context = overlay._canvas.getContext('2d');
-    // context.clearRect(0, 0, overlay._canvas.width, overlay._canvas.height);
+    const context = overlay._canvas.getContext('2d');
+    for (var k in aircraftDict) {
+        var pt = map.tryLocationToPixel(aircraftDict[k].location, Microsoft.Maps.PixelReference.control);
+        context.clearRect(pt.x, pt.y, 30*2, 30*2);
+    }
+    aircraftDict = {};
 }
 
 function clearPlanes(newAircraftList) {
@@ -247,40 +220,36 @@ function movePins(newAircraftList) {
             var key = newAircraftList[i].Icao;
             var from = aircraftDict[key]['location'];
             var to = new Microsoft.Maps.Location(newLat, newLong);
-            var angle = compAngle(aircraftDict[key]['location'], to);
-            pt = map.tryLocationToPixel(to, Microsoft.Maps.PixelReference.control);
-            // SVG.get(key).rotate(0).scale(1).center(pt.x, pt.y).scale(0.1).rotate(angle * 180 / Math.PI + 90);
-            SVG.get(key).scale(1).scale(0.1).animate(updateDuration, '-', 0).center(pt.x, pt.y);
-            // movePin(SVG.get(key), from, to, updateDuration);
-            
-            var tmpPt = map.tryLocationToPixel(cityLocation['NewYork'], Microsoft.Maps.PixelReference.control);
-            SVG.get('000000').rotate(0).scale(1).center(tmpPt.x, tmpPt.y).scale(0.1).rotate(i*5);
-            console.log('000000', tmpPt.x, tmpPt.y);
-            
-            // if (key == 'A841BD') {
-                // console.log(key, newLat, newLong, pt.x, pt.y, angle);
-            // }
-            // todo set new location
-            aircraftDict[key]["location"] = to;
+            // var angle = compAngle(aircraftDict[key]['location'], to);
+            movePin(key, from, to);
         }
     }
 }
 
-function movePin(el, from, to, duration) {
+function movePin(key, from, to) {
     var timestamp = performance.now();
     var start = timestamp;
-    var end = start + duration;
+    var end = start + updateDuration;
+    var aircraftImage = getIconUrl('');
     var h;
+    console.log('from', from);
+    console.log('to', to);
     var angle = compAngle(from, to);
+    console.log(angle);
     var step = function () {
         var timestamp = performance.now();
-        var loc = interpolatePosition(from, to, timestamp, start, duration);
+        var loc = interpolatePosition(from, to, timestamp, start, updateDuration);
+        // const context = overlay._canvas.getContext('2d');
+        // context.clearRect(0, 0, overlay._canvas.width, overlay._canvas.height);
         if (timestamp < end) {
+            // clearAllPlanes();
             var pt = map.tryLocationToPixel(loc, Microsoft.Maps.PixelReference.control);
-            el.rotate(0).scale(1).center(pt.x, pt.y).scale(0.1).rotate(angle * 180 / Math.PI + 90);
+            drawPlane(overlay._canvas.getContext("2d"), aircraftImage, pt.x, pt.y, angle);
         } else {
+            // clearAllPlanes();
             var pt = map.tryLocationToPixel(to, Microsoft.Maps.PixelReference.control);
-            el.rotate(0).scale(1).center(pt.x, pt.y).scale(0.1).rotate(angle * 180 / Math.PI + 90);
+            drawPlane(overlay._canvas.getContext("2d"), aircraftImage, pt.x, pt.y, angle);
+            aircraftDict[key]['location'] = to;
             clearInterval(h);
         }
     }

@@ -43,13 +43,13 @@ function configureConnection(connection) {
     var updateAircraftsCallback = function(duration, str, ind) {
         var aircrafts = JSON.parse(str);
         // if (isInit == false) {
-            aircraftsCache = aircrafts;
+            // aircraftsCache = aircrafts;
         // }
         console.log('updateDuration', updateDuration);
         updateDuration = duration;
         if (ind == 0) 
             isInit = false;
-        updateAircraft(aircraftsCache);
+        updateAircraft(aircrafts);
         isInit = true;
         // if (!isInit) {
         //     initAircraft(aircrafts);

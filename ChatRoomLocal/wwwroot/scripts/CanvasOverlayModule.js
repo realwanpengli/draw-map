@@ -54,8 +54,8 @@ var CanvasOverlay = (function (_super) {
      */
     CanvasOverlay.prototype.onAdd = function () {
         //Create a canvas for rendering.
-        this._canvas = document.createElement('div');
-        this._canvas.setAttribute('id','flightMapSvg')
+        this._canvas = document.createElement('canvas');
+        // this._canvas.setAttribute('id','flightMapSvg')
         this._canvas.style.position = 'absolute';
         this._canvas.style.left = '0px';
         this._canvas.style.top = '0px';

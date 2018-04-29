@@ -28,7 +28,7 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
         private static long updateDuration = 1;
         // private static int xxx;
         private static long curTimestamp = -1;
-        private static long speedup = 15;
+        private static long speedup = 15/3;
         private static long realDuration = 15 * 1000;
 
         public void StartUpdate()
