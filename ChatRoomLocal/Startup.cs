@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Microsoft.Azure.SignalR.Samples.ChatRoom
+namespace Microsoft.Azure.SignalR.Samples.FlightMap
 {
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -25,7 +25,7 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddScoped<IChat, Chat>();
+            services.AddScoped<IFlightMapHub, FlightMapHub>();
             services.AddMvc();
             services.AddSingleton(typeof(IConfiguration), Configuration);
             if (!Constants.UseLoacalSignalR) services.AddAzureSignalR();
@@ -46,12 +46,12 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
                 app.UseAzureSignalR(Configuration[Constants.AzureSignalRConnectionStringKey],
                     builder => 
                     { 
-                        builder.UseHub<Chat>(); 
+                        builder.UseHub<FlightMapHub>(); 
                     });
             else
                 app.UseSignalR(routes =>
                 { 
-                    routes.MapHub<Chat>("/chat");
+                    routes.MapHub<FlightMapHub>("/chat");
                 });
         }
     }

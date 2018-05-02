@@ -36,7 +36,7 @@ namespace console
     //   SetTimer();
 
     // get timestamp
-    Int32 unixTimestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+    long unixTimestamp = (long)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
     Console.WriteLine(unixTimestamp);
 
       Console.WriteLine("\nPress the Enter key to exit the application...\n");

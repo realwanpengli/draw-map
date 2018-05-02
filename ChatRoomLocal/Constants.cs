@@ -1,5 +1,5 @@
 
-namespace Microsoft.Azure.SignalR.Samples.ChatRoom
+namespace Microsoft.Azure.SignalR.Samples.FlightMap
 
 {
 

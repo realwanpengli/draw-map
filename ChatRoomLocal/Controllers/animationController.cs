@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Microsoft.Azure.SignalR.Samples.ChatRoom
+namespace Microsoft.Azure.SignalR.Samples.FlightMap
 {
     using System.Security.Claims;
     using Microsoft.AspNetCore.Mvc;
@@ -13,9 +13,9 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
     
     public class animationController : Controller {
 
-        IChat chat;
+        IFlightMapHub chat;
         string _password = "demo";
-        public animationController(IChat ch) {
+        public animationController(IFlightMapHub ch) {
             this.chat = ch;
         }
 
@@ -33,6 +33,18 @@ namespace Microsoft.Azure.SignalR.Samples.ChatRoom
             if (password != _password) return "Wrong password.";
             chat.StopUpdate();
             return "Stop animation.";
+        }
+
+        public string restart(string password) {
+            if (password != _password) return "Wrong password.";
+            chat.RestartUpdate(0);
+            return "Restart animation.";
+        }
+
+        public string restart_debug(string password, int resetind) {
+            if (password != _password) return "Wrong password.";
+            chat.RestartUpdate(resetind);
+            return "Restart animation.";
         }
     }
 }

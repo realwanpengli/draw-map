@@ -32,24 +32,38 @@ function startConnection(url, configureConnection) {
 function onConnectionError(error) {
     if (error && error.message) {
         console.error(error.message);
+        var username = generateRandomName();
+             console.log("Connecting signalR username", username);
+             
+             if (!useLocalSignalR)
+                 getAccessToken(`/api/auth/chat?uid=${username}`)
+                 .then(function(endpoint) {
+                     accessToken = endpoint.accessToken;
+                     return startConnection(endpoint.serviceUrl, configureConnection);
+                 })
+                 .then(onConnected)
+                 .catch(onConnectionError);
+             else
+                 startConnection('/chat', configureConnection)
+                 .then(onConnected)
+                 .catch(onConnectionError);
     }
 }
 
 function onConnected(connection) {
     console.log('connection started');
-    // $('#startUpdate').click(function (event) {
-    //     console.log("Start updpate aircrafts");
-    //     connection.send('startUpdate');
-    // });
-    
+    connection.send('countVisitor');
 }
 
 function configureConnection(connection) {
-    var updateAircraftsCallback = function(duration, aircrafts, ind) {
-        console.log('updateDuration', updateDuration);
+    var updateAircraftsCallback = function(duration, aircrafts, ind, serverTimestamp, timestamp, speedupRatio) {
+        curTimestamp = timestamp;
+        speedup = speedupRatio;
         updateDuration = duration;
+        console.log("dt = ", new Date().getTime() - serverTimestamp);
+        console.log('updateDuration', updateDuration);
         aircraftJsonStrCache = aircrafts;
-        if (ind == 0) 
+        if (ind == 0 ) 
             isInit = false;
         if (!isInit) {
             initAircraft(aircrafts);
@@ -59,10 +73,14 @@ function configureConnection(connection) {
         
     };
 
+    var countVisitorsCallback = (totalVisitors) => {
+        $("#counter-checkin").text(`${totalVisitors} joined`);
+    }
+
     // Create a function that the hub can call to broadcast messages.
     connection.on('startUpdate', updateAircraftsCallback);
     connection.on('updateAircraft', updateAircraftsCallback);
-    // connection.on('updateBoundRequest', updateBoundRequestCallBack);
+    connection.on('countVisitors', countVisitorsCallback);
     connection.onclose(onConnectionError);
 }
 
